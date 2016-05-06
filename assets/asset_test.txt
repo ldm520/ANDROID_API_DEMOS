@@ -1,0 +1,2 @@
+This text is stored in a raw Asset.
+这些文字存放在Android的assets文件下。

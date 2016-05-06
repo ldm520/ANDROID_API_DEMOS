@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="?android:attr/listDivider"
+        android:orientation="vertical"
+        android:showDividers="middle" >
+
+        <!-- 通过在布局中autoLink属性设置TextView的链接功能. -->
+
+        <TextView
+            android:id="@+id/text1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:autoLink="all"
+            android:paddingBottom="8dp"
+            android:text="&lt;b>text1: Various kinds
+      of data that will be auto-linked.&lt;/b>  In
+      this text are some things that are actionable.  For instance,
+      you can click on http://www.google.com and it will launch the
+      web browser.  You can click on google.com too.  If you
+      click on (415) 555-1212 it should dial the phone.  Or just write
+      foobar@example.com for an e-mail link.  If you have a URI like
+      http://www.example.com/lala/foobar@example.com you should get the
+      full link not the e-mail address.  Or you can put a location
+      like 1600 Amphitheatre Parkway, Mountain View, CA 94043.  To summarize:
+      https://www.google.com, or 650-253-0000, somebody@example.com,
+      or 9606 North MoPac Expressway, Suite 400, Austin, TX 78759."
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <TextView
+            android:id="@+id/text3"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingBottom="8dp"
+            android:paddingTop="8dp"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <TextView
+            android:id="@+id/text4"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingTop="8dp"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </LinearLayout>
+
+</ScrollView>
