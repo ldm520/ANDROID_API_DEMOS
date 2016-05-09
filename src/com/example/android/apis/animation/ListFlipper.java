@@ -39,88 +39,94 @@ import android.widget.SeekBar;
  * UI allows you to set the position of the animation. Pressing the Run button will play from
  * the current position of the animation.
  */
+/**
+ * API动画效果之：列表界面翻转动画效果
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-9 上午10:00:25
+ */
 public class ListFlipper extends Activity {
+	// 列表正面数据
+	private static final String[] LIST_STRINGS_EN = new String[] { "One",
+			"Two", "Three", "Four", "Five", "Six" };
+	// 页面翻转后页面数据
+	private static final String[] LIST_STRINGS_FR = new String[] { "Un",
+			"Deux", "Trois", "Quatre", "Le Five", "Six" };
 
-    private static final int DURATION = 1500;
-    private SeekBar mSeekBar;
+	ListView mEnglishList;
+	ListView mFrenchList;
 
-    private static final String[] LIST_STRINGS_EN = new String[] {
-            "One",
-            "Two",
-            "Three",
-            "Four",
-            "Five",
-            "Six"
-    };
-    private static final String[] LIST_STRINGS_FR = new String[] {
-            "Un",
-            "Deux",
-            "Trois",
-            "Quatre",
-            "Le Five",
-            "Six"
-    };
+	/** Called when the activity is first created. */
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.rotating_list);
+		// FrameLayout container = (LinearLayout) findViewById(R.id.container);
+		// 初始化ListView
+		mEnglishList = (ListView) findViewById(R.id.list_en);
+		mFrenchList = (ListView) findViewById(R.id.list_fr);
 
-    ListView mEnglishList;
-    ListView mFrenchList;
+		// 为ListView设置适配器
+		final ArrayAdapter<String> adapterEn = new ArrayAdapter<String>(this,
+				android.R.layout.simple_list_item_1, LIST_STRINGS_EN);
+		// Prepare the ListView
+		final ArrayAdapter<String> adapterFr = new ArrayAdapter<String>(this,
+				android.R.layout.simple_list_item_1, LIST_STRINGS_FR);
 
-    /** Called when the activity is first created. */
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.rotating_list);
-        //FrameLayout container = (LinearLayout) findViewById(R.id.container);
-        mEnglishList = (ListView) findViewById(R.id.list_en);
-        mFrenchList = (ListView) findViewById(R.id.list_fr);
+		mEnglishList.setAdapter(adapterEn);
+		mFrenchList.setAdapter(adapterFr);
+		// 设置旋转
+		mFrenchList.setRotationY(-90f);
 
-        // Prepare the ListView
-        final ArrayAdapter<String> adapterEn = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, LIST_STRINGS_EN);
-        // Prepare the ListView
-        final ArrayAdapter<String> adapterFr = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, LIST_STRINGS_FR);
+		Button starter = (Button) findViewById(R.id.button);
+		starter.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				// 点击FLIP的Button后页面翻转
+				flipit();
+			}
+		});
+	}
 
-        mEnglishList.setAdapter(adapterEn);
-        mFrenchList.setAdapter(adapterFr);
-        mFrenchList.setRotationY(-90f);
+	// 定义了加速及减速的插值器
+	private Interpolator accelerator = new AccelerateInterpolator();
+	private Interpolator decelerator = new DecelerateInterpolator();
 
-        Button starter = (Button) findViewById(R.id.button);
-        starter.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                flipit();
-            }
-        });
-    }
-
-    private Interpolator accelerator = new AccelerateInterpolator();
-    private Interpolator decelerator = new DecelerateInterpolator();
-    private void flipit() {
-        final ListView visibleList;
-        final ListView invisibleList;
-        if (mEnglishList.getVisibility() == View.GONE) {
-            visibleList = mFrenchList;
-            invisibleList = mEnglishList;
-        } else {
-            invisibleList = mFrenchList;
-            visibleList = mEnglishList;
-        }
-        ObjectAnimator visToInvis = ObjectAnimator.ofFloat(visibleList, "rotationY", 0f, 90f);
-        visToInvis.setDuration(500);
-        visToInvis.setInterpolator(accelerator);
-        final ObjectAnimator invisToVis = ObjectAnimator.ofFloat(invisibleList, "rotationY",
-                -90f, 0f);
-        invisToVis.setDuration(500);
-        invisToVis.setInterpolator(decelerator);
-        visToInvis.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator anim) {
-                visibleList.setVisibility(View.GONE);
-                invisToVis.start();
-                invisibleList.setVisibility(View.VISIBLE);
-            }
-        });
-        visToInvis.start();
-    }
-
+	private void flipit() {
+		// 定义两个ListView，作用是充当容器
+		final ListView visibleList;
+		final ListView invisibleList;
+		// 如果英语mEnglishList为不可见的
+		if (mEnglishList.getVisibility() == View.GONE) {
+			// mFrenchList可见
+			visibleList = mFrenchList;
+			invisibleList = mEnglishList;
+		} else {// 反之
+			invisibleList = mFrenchList;
+			visibleList = mEnglishList;
+		}
+		// 动画效果:绕Y轴0°到90°旋转
+		ObjectAnimator visToInvis = ObjectAnimator.ofFloat(visibleList,
+				"rotationY", 0f, 90f);
+		visToInvis.setDuration(500);
+		// 设置加速差值器
+		visToInvis.setInterpolator(accelerator);
+		// 动画效果:绕Y轴逆时针旋转90°
+		final ObjectAnimator invisToVis = ObjectAnimator.ofFloat(invisibleList,
+				"rotationY", -90f, 0f);
+		invisToVis.setDuration(500);
+		invisToVis.setInterpolator(decelerator);
+		// 动画过程监听
+		visToInvis.addListener(new AnimatorListenerAdapter() {
+			@Override
+			public void onAnimationEnd(Animator anim) {
+				visibleList.setVisibility(View.GONE);
+				invisToVis.start();
+				invisibleList.setVisibility(View.VISIBLE);
+			}
+		});
+		// 启动动画
+		visToInvis.start();
+	}
 
 }
