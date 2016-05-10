@@ -31,59 +31,67 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
 
-
 /**
  * This demonstrates how you can schedule an alarm that causes a service to
  * be started.  This is useful when you want to schedule alarms that initiate
  * long-running operations, such as retrieving recent e-mails.
  */
+/**
+ * 使用Alarm机制定时启动service，并让service显示Notification的例子
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-10 上午10:40:55
+ */
 public class AlarmService extends Activity {
-    private PendingIntent mAlarmSender;
-    
-    @Override
+	private PendingIntent mAlarmSender;
+
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+		super.onCreate(savedInstanceState);
 
-        // Create an IntentSender that will launch our service, to be scheduled
-        // with the alarm manager.
-        mAlarmSender = PendingIntent.getService(AlarmService.this,
-                0, new Intent(AlarmService.this, AlarmService_Service.class), 0);
-        
-        setContentView(R.layout.alarm_service);
+		// Create an IntentSender that will launch our service, to be scheduled
+		// with the alarm manager.
+		// 创建特定（指定的）意图Intent
+		mAlarmSender = PendingIntent.getService(AlarmService.this, 0,
+				new Intent(AlarmService.this, AlarmService_Service.class), 0);
 
-        // Watch for button clicks.
-        Button button = (Button)findViewById(R.id.start_alarm);
-        button.setOnClickListener(mStartAlarmListener);
-        button = (Button)findViewById(R.id.stop_alarm);
-        button.setOnClickListener(mStopAlarmListener);
-    }
+		setContentView(R.layout.alarm_service);
 
-    private OnClickListener mStartAlarmListener = new OnClickListener() {
-        public void onClick(View v) {
-            // We want the alarm to go off 30 seconds from now.
-            long firstTime = SystemClock.elapsedRealtime();
+		// Watch for button clicks.
+		Button button = (Button) findViewById(R.id.start_alarm);
+		button.setOnClickListener(mStartAlarmListener);
+		button = (Button) findViewById(R.id.stop_alarm);
+		button.setOnClickListener(mStopAlarmListener);
+	}
 
-            // Schedule the alarm!
-            AlarmManager am = (AlarmManager)getSystemService(ALARM_SERVICE);
-            am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                            firstTime, 30*1000, mAlarmSender);
+	private OnClickListener mStartAlarmListener = new OnClickListener() {
+		public void onClick(View v) {
+			// We want the alarm to go off 30 seconds from now.
+			long firstTime = SystemClock.elapsedRealtime();
 
-            // Tell the user about what we did.
-            Toast.makeText(AlarmService.this, R.string.repeating_scheduled,
-                    Toast.LENGTH_LONG).show();
-        }
-    };
+			// 注册Alarm并定时30秒发一次
+			AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+			am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, firstTime,
+					30 * 1000, mAlarmSender);
 
-    private OnClickListener mStopAlarmListener = new OnClickListener() {
-        public void onClick(View v) {
-            // And cancel the alarm.
-            AlarmManager am = (AlarmManager)getSystemService(ALARM_SERVICE);
-            am.cancel(mAlarmSender);
+			// Tell the user about what we did.
+			Toast.makeText(AlarmService.this, R.string.repeating_scheduled,
+					Toast.LENGTH_LONG).show();
+		}
+	};
 
-            // Tell the user about what we did.
-            Toast.makeText(AlarmService.this, R.string.repeating_unscheduled,
-                    Toast.LENGTH_LONG).show();
+	private OnClickListener mStopAlarmListener = new OnClickListener() {
+		public void onClick(View v) {
+			// And cancel the alarm.
+			//停止Alarm
+			AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+			am.cancel(mAlarmSender);
 
-        }
-    };
+			// Tell the user about what we did.
+			Toast.makeText(AlarmService.this, R.string.repeating_unscheduled,
+					Toast.LENGTH_LONG).show();
+
+		}
+	};
 }
