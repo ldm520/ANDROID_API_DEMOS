@@ -15,8 +15,6 @@
  */
 package com.example.android.apis.app;
 
-import com.example.android.apis.R;
-
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.app.Activity;
@@ -29,105 +27,129 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.android.apis.R;
+
 /**
  * This demonstrates the use of action bar tabs and how they interact
  * with other action bar features.
  */
+/**
+ * ActionBar效果之Tab效果
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-10 上午9:54:36
+ */
 public class ActionBarTabs extends Activity {
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.action_bar_tabs);
+	}
 
-        setContentView(R.layout.action_bar_tabs);
-    }
+	/**
+	 * 增加Tab
+	 * */
+	@SuppressWarnings("deprecation")
+	public void onAddTab(View v) {
 
-    public void onAddTab(View v) {
-        final ActionBar bar = getActionBar();
-        final int tabCount = bar.getTabCount();
-        final String text = "Tab " + tabCount;
-        bar.addTab(bar.newTab()
-                .setText(text)
-                .setTabListener(new TabListener(new TabContentFragment(text))));
-    }
+		final ActionBar bar = getActionBar();
+		final int tabCount = bar.getTabCount();
+		final String text = "Tab " + tabCount;
+		bar.addTab(bar.newTab().setText(text)
+				.setTabListener(new TabListener(new TabContentFragment(text))));
+	}
 
-    public void onRemoveTab(View v) {
-        final ActionBar bar = getActionBar();
-        if (bar.getTabCount() > 0) {
-            bar.removeTabAt(bar.getTabCount() - 1);
-        }
-    }
+	/**
+	 * 移除TAB
+	 * 
+	 * @description：
+	 * @author ldm
+	 * @date 2016-5-10 上午9:55:57
+	 */
+	@SuppressWarnings("deprecation")
+	public void onRemoveTab(View v) {
+		final ActionBar bar = getActionBar();
+		if (bar.getTabCount() > 0) {
+			bar.removeTabAt(bar.getTabCount() - 1);
+		}
+	}
 
-    public void onToggleTabs(View v) {
-        final ActionBar bar = getActionBar();
+	@SuppressWarnings("deprecation")
+	public void onToggleTabs(View v) {
+		final ActionBar bar = getActionBar();
 
-        if (bar.getNavigationMode() == ActionBar.NAVIGATION_MODE_TABS) {
-            bar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-            bar.setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE, ActionBar.DISPLAY_SHOW_TITLE);
-        } else {
-            bar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-            bar.setDisplayOptions(0, ActionBar.DISPLAY_SHOW_TITLE);
-        }
-    }
+		if (bar.getNavigationMode() == ActionBar.NAVIGATION_MODE_TABS) {
+			bar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+			bar.setDisplayOptions(ActionBar.DISPLAY_SHOW_TITLE,
+					ActionBar.DISPLAY_SHOW_TITLE);
+		} else {
+			bar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+			bar.setDisplayOptions(0, ActionBar.DISPLAY_SHOW_TITLE);
+		}
+	}
 
-    public void onRemoveAllTabs(View v) {
-        getActionBar().removeAllTabs();
-    }
+	public void onRemoveAllTabs(View v) {
+		getActionBar().removeAllTabs();
+	}
 
-    /**
-     * A TabListener receives event callbacks from the action bar as tabs
-     * are deselected, selected, and reselected. A FragmentTransaction
-     * is provided to each of these callbacks; if any operations are added
-     * to it, it will be committed at the end of the full tab switch operation.
-     * This lets tab switches be atomic without the app needing to track
-     * the interactions between different tabs.
-     *
-     * NOTE: This is a very simple implementation that does not retain
-     * fragment state of the non-visible tabs across activity instances.
-     * Look at the FragmentTabs example for how to do a more complete
-     * implementation.
-     */
-    private class TabListener implements ActionBar.TabListener {
-        private TabContentFragment mFragment;
+	/**
+	 * A TabListener receives event callbacks from the action bar as tabs are
+	 * deselected, selected, and reselected. A FragmentTransaction is provided
+	 * to each of these callbacks; if any operations are added to it, it will be
+	 * committed at the end of the full tab switch operation. This lets tab
+	 * switches be atomic without the app needing to track the interactions
+	 * between different tabs.
+	 * 
+	 * NOTE: This is a very simple implementation that does not retain fragment
+	 * state of the non-visible tabs across activity instances. Look at the
+	 * FragmentTabs example for how to do a more complete implementation.
+	 */
+	@SuppressWarnings("deprecation")
+	private class TabListener implements ActionBar.TabListener {
+		private TabContentFragment mFragment;
 
-        public TabListener(TabContentFragment fragment) {
-            mFragment = fragment;
-        }
+		public TabListener(TabContentFragment fragment) {
+			mFragment = fragment;
+		}
 
-        public void onTabSelected(Tab tab, FragmentTransaction ft) {
-            ft.add(R.id.fragment_content, mFragment, mFragment.getText());
-        }
+		public void onTabSelected(Tab tab, FragmentTransaction ft) {
+			ft.add(R.id.fragment_content, mFragment, mFragment.getText());
+		}
 
-        public void onTabUnselected(Tab tab, FragmentTransaction ft) {
-            ft.remove(mFragment);
-        }
+		public void onTabUnselected(Tab tab, FragmentTransaction ft) {
+			ft.remove(mFragment);
+		}
 
-        public void onTabReselected(Tab tab, FragmentTransaction ft) {
-            Toast.makeText(ActionBarTabs.this, "Reselected!", Toast.LENGTH_SHORT).show();
-        }
+		public void onTabReselected(Tab tab, FragmentTransaction ft) {
+			Toast.makeText(ActionBarTabs.this, "Reselected!",
+					Toast.LENGTH_SHORT).show();
+		}
 
-    }
+	}
 
-    private class TabContentFragment extends Fragment {
-        private String mText;
+	private class TabContentFragment extends Fragment {
+		private String mText;
 
-        public TabContentFragment(String text) {
-            mText = text;
-        }
+		public TabContentFragment(String text) {
+			mText = text;
+		}
 
-        public String getText() {
-            return mText;
-        }
+		public String getText() {
+			return mText;
+		}
 
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View fragView = inflater.inflate(R.layout.action_bar_tab_content, container, false);
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container,
+				Bundle savedInstanceState) {
+			View fragView = inflater.inflate(R.layout.action_bar_tab_content,
+					container, false);
 
-            TextView text = (TextView) fragView.findViewById(R.id.text);
-            text.setText(mText);
+			TextView text = (TextView) fragView.findViewById(R.id.text);
+			text.setText(mText);
 
-            return fragView;
-        }
+			return fragView;
+		}
 
-    }
+	}
 }

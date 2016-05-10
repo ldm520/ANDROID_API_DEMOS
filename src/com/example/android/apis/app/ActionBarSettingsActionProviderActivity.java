@@ -36,77 +36,102 @@ import com.example.android.apis.R;
  * ActionProvider for launching the system settings and adds a menu item with that
  * provider.
  */
+/**
+ * ActionBar操作栏，可以通过ActionBar监听打开系统设置
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-10 上午9:32:41
+ */
 public class ActionBarSettingsActionProviderActivity extends Activity {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
-        getMenuInflater().inflate(R.menu.action_bar_settings_action_provider, menu);
-        return true;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+		// 获取ActionBar菜单对应布局
+		getMenuInflater().inflate(R.menu.action_bar_settings_action_provider,
+				menu);
+		return true;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // If this callback does not handle the item click, onPerformDefaultAction
-        // of the ActionProvider is invoked. Hence, the provider encapsulates the
-        // complete functionality of the menu item.
-        Toast.makeText(this, R.string.action_bar_settings_action_provider_no_handling,
-                Toast.LENGTH_SHORT).show();
-        return false;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// If this callback does not handle the item click,
+		// onPerformDefaultAction
+		// of the ActionProvider is invoked. Hence, the provider encapsulates
+		// the
+		// complete functionality of the menu item.
+		Toast.makeText(this,
+				R.string.action_bar_settings_action_provider_no_handling,
+				Toast.LENGTH_SHORT).show();
+		return false;
+	}
 
-    public static class SettingsActionProvider extends ActionProvider {
+	/**
+	 * 自定义ActionProvider
+	 * 
+	 * @description：
+	 * @author ldm
+	 * @date 2016-5-10 上午9:36:16
+	 */
+	public static class SettingsActionProvider extends ActionProvider {
 
-        /** An intent for launching the system settings. */
-        private static final Intent sSettingsIntent = new Intent(Settings.ACTION_SETTINGS);
+		/** An intent for launching the system settings. */
+		// 系统设置ACTION
+		private static final Intent sSettingsIntent = new Intent(
+				Settings.ACTION_SETTINGS);
 
-        /** Context for accessing resources. */
-        private final Context mContext;
+		/** Context for accessing resources. */
+		private final Context mContext;
 
-        /**
-         * Creates a new instance.
-         *
-         * @param context Context for accessing resources.
-         */
-        public SettingsActionProvider(Context context) {
-            super(context);
-            mContext = context;
-        }
+		/**
+		 * Creates a new instance.
+		 * 
+		 * @param context
+		 *            Context for accessing resources.
+		 */
+		public SettingsActionProvider(Context context) {
+			super(context);
+			mContext = context;
+		}
 
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public View onCreateActionView() {
-            // Inflate the action view to be shown on the action bar.
-            LayoutInflater layoutInflater = LayoutInflater.from(mContext);
-            View view = layoutInflater.inflate(R.layout.action_bar_settings_action_provider, null);
-            ImageButton button = (ImageButton) view.findViewById(R.id.button);
-            // Attach a click listener for launching the system settings.
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mContext.startActivity(sSettingsIntent);
-                }
-            });
-            return view;
-        }
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public View onCreateActionView() {
+			// Inflate the action view to be shown on the action bar.
+			LayoutInflater layoutInflater = LayoutInflater.from(mContext);
+			View view = layoutInflater.inflate(
+					R.layout.action_bar_settings_action_provider, null);
+			ImageButton button = (ImageButton) view.findViewById(R.id.button);
+			// Attach a click listener for launching the system settings.
+			button.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					mContext.startActivity(sSettingsIntent);
+				}
+			});
+			return view;
+		}
 
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public boolean onPerformDefaultAction() {
-            // This is called if the host menu item placed in the overflow menu of the
-            // action bar is clicked and the host activity did not handle the click.
-            mContext.startActivity(sSettingsIntent);
-            return true;
-        }
-    }
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public boolean onPerformDefaultAction() {
+			// This is called if the host menu item placed in the overflow menu
+			// of the
+			// action bar is clicked and the host activity did not handle the
+			// click.
+			mContext.startActivity(sSettingsIntent);
+			return true;
+		}
+	}
 }

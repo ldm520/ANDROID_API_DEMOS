@@ -24,47 +24,62 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
+/**
+ * Activity的重启方法：Rcreate()
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-10 上午10:06:45
+ */
 public class ActivityRecreate extends Activity {
-    int mCurTheme;
+	int mCurTheme;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
-        if (savedInstanceState != null) {
-            mCurTheme = savedInstanceState.getInt("theme");
+		if (savedInstanceState != null) {
+			// // 从onSaveInstanceState(Bundle outState)方法中保存的数据取出Theme
+			mCurTheme = savedInstanceState.getInt("theme");
 
-            // Switch to a new theme different from last theme.
-            switch (mCurTheme) {
-                case android.R.style.Theme_Holo_Light:
-                    mCurTheme = android.R.style.Theme_Holo_Dialog;
-                    break;
-                case android.R.style.Theme_Holo_Dialog:
-                    mCurTheme = android.R.style.Theme_Holo;
-                    break;
-                default:
-                    mCurTheme = android.R.style.Theme_Holo_Light;
-                    break;
-            }
-            setTheme(mCurTheme);
-        }
+			// 切换页面主题Theme
+			switch (mCurTheme) {
+			case android.R.style.Theme_Holo_Light:
+				mCurTheme = android.R.style.Theme_Holo_Dialog;
+				break;
+			case android.R.style.Theme_Holo_Dialog:
+				mCurTheme = android.R.style.Theme_Holo;
+				break;
+			default:
+				mCurTheme = android.R.style.Theme_Holo_Light;
+				break;
+			}
+			setTheme(mCurTheme);
+		}
 
-        setContentView(R.layout.activity_recreate);
+		setContentView(R.layout.activity_recreate);
 
-        // Watch for button clicks.
-        Button button = (Button)findViewById(R.id.recreate);
-        button.setOnClickListener(mRecreateListener);
-    }
+		// Watch for button clicks.
+		Button button = (Button) findViewById(R.id.recreate);
+		button.setOnClickListener(mRecreateListener);
+	}
 
-    @Override
-    protected void onSaveInstanceState(Bundle savedInstanceState) {
-        super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putInt("theme", mCurTheme);
-    }
+	@Override
+	protected void onSaveInstanceState(Bundle savedInstanceState) {
+		super.onSaveInstanceState(savedInstanceState);
+		// 把当前Theme保存
+		savedInstanceState.putInt("theme", mCurTheme);
+	}
 
-    private OnClickListener mRecreateListener = new OnClickListener() {
-        public void onClick(View v) {
-            recreate();
-        }
-    };
+	private OnClickListener mRecreateListener = new OnClickListener() {
+		public void onClick(View v) {
+			/**
+			 * 调用recreate方法重新创建Activity会比正常启动Activity多调用了onSaveInstanceState
+			 * ()和onRestoreInstanceState
+			 * ()两个方法，onSaveInstanceState()会在onCreate方法之前调用。
+			 * 所以可以在onCreate()方法中获取onSaveInstanceState()保存的Theme数据
+			 */
+			recreate();
+		}
+	};
 }
