@@ -22,12 +22,16 @@ import android.content.Intent;
 import android.widget.Toast;
 
 /**
- * Executed when a new version of the application is is installed.
+ * 新版本安装后会调用这个广播
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-10 下午3:04:47
  */
 public class AppUpdateSspReceiver extends BroadcastReceiver {
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        String msg = "Ssp update received: " + intent.getData();
-        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
-    }
+	@Override
+	public void onReceive(Context context, Intent intent) {
+		String msg = "Ssp update received: " + intent.getData();
+		Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+	}
 }

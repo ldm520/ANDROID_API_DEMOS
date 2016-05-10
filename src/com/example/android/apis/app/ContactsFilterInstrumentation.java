@@ -24,50 +24,44 @@ import android.os.Bundle;
 import android.util.Log;
 
 /**
- * This is an example implementation of the {@link android.app.Instrumentation}
- * class, allowing you to run tests against application code.  The
- * instrumentation implementation here is loaded into the application's
- * process, for controlling and monitoring what it does.
+ * 自定义自动化测试类
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-10 下午3:12:10
  */
 public class ContactsFilterInstrumentation extends Instrumentation {
-    @Override
-    public void onCreate(Bundle arguments) {
-        super.onCreate(arguments);
+	@Override
+	public void onCreate(Bundle arguments) {
+		super.onCreate(arguments);
+		start();
+	}
 
-        // When this instrumentation is created, we simply want to start
-        // its test code off in a separate thread, which will call back
-        // to us in onStart().
-        start();
-    }
+	@Override
+	public void onStart() {
+		super.onStart();
+		// 作为Task中第一个Activity启动
+		Intent intent = new Intent(Intent.ACTION_MAIN);
+		// //相当于singleTask
+		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		intent.setClassName(getTargetContext(), "com.android.phone.Dialer");
+		// startActivitySync是一个同步方式启动Activity的功能，在正常的startActivity()之后，
+		// 一直进入等待状态，直到Activity运行起来该函数才返回，这样，当我们想知道一个Activity的启动性能的时候，这个是非常重要的实现。
+		Activity activity = startActivitySync(intent);
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        // First start the activity we are instrumenting -- the contacts
-        // list.
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.setClassName(getTargetContext(),
-                "com.android.phone.Dialer");
-        Activity activity = startActivitySync(intent);
+		Log.i("ContactsFilterInstrumentation", "Started: " + activity);
 
-        // This is the Activity object that was started, to do with as we want.
-        Log.i("ContactsFilterInstrumentation", "Started: " + activity);
+		// 发送键盘和鼠标消息给当前有焦点的窗口
+		sendKeySync(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_M));
+		sendKeySync(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_M));
+		sendKeySync(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_A));
+		sendKeySync(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_A));
 
-        // We are going to enqueue a couple key events to simulate the user
-        // filtering the list.  This is the low-level API so we must send both
-        // down and up events.
-        sendKeySync(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_M));
-        sendKeySync(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_M));
-        sendKeySync(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_A));
-        sendKeySync(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_A));
+		// 等待Activity空闲时，即等待Activity启动完毕
+		waitForIdleSync();
 
-        // Wait for the activity to finish all of its processing.
-        waitForIdleSync();
-
-        // And we are done!
-        Log.i("ContactsFilterInstrumentation", "Done!");
-        finish(Activity.RESULT_OK, null);
-    }
+		Log.i("ContactsFilterInstrumentation", "Done!");
+		//启动完毕后关闭
+		finish(Activity.RESULT_OK, null);
+	}
 }
-

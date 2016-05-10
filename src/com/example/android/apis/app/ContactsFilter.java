@@ -28,26 +28,28 @@ import android.widget.Button;
 import com.example.android.apis.R;
 
 /**
- * Front-end for launching {@link ContactsFilterInstrumentation} example
- * instrumentation class.
+ * Activity实现自动化测试
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-10 下午3:06:39
  */
 public class ContactsFilter extends Activity {
-    @Override
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.contacts_filter);
+		// Watch for button clicks.
+		Button button = (Button) findViewById(R.id.go);
+		button.setOnClickListener(mGoListener);
+	}
 
-        setContentView(R.layout.contacts_filter);
-
-        // Watch for button clicks.
-        Button button = (Button)findViewById(R.id.go);
-        button.setOnClickListener(mGoListener);
-    }
-
-    private OnClickListener mGoListener = new OnClickListener() {
-        public void onClick(View v) {
-            startInstrumentation(new ComponentName(ContactsFilter.this,
-                            ContactsFilterInstrumentation.class), null, null);
-        }
-    };
+	private OnClickListener mGoListener = new OnClickListener() {
+		public void onClick(View v) {
+			// 在activity中 启动Instrumentation
+			// 以便调用运行测试项目ActivityInstrumentationTestCase2
+			startInstrumentation(new ComponentName(ContactsFilter.this,
+					ContactsFilterInstrumentation.class), null, null);
+		}
+	};
 }
-

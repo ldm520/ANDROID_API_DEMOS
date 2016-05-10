@@ -27,59 +27,42 @@ import android.widget.TextView;
 
 import com.example.android.apis.R;
 
-
 /**
- * Example of how to use a custom title {@link android.view.Window#FEATURE_CUSTOM_TITLE}.
- * <h3>CustomTitle</h3>
-
-<p>This demonstrates how a custom title can be used.</p>
-
-<h4>Demo</h4>
-App/Title/Custom Title
- 
-<h4>Source files</h4>
- * <table class="LinkTable">
- *         <tr>
- *             <td >src/com.example.android.apis/app/CustomTitle.java</td>
- *             <td >The Custom Title implementation</td>
- *         </tr>
- *         <tr>
- *             <td >/res/any/layout/custom_title.xml</td>
- *             <td >Defines contents of the screen</td>
- *         </tr>
- * </table> 
+ * 自定义通用Title对应Activity
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-10 下午3:48:18
  */
 public class CustomTitle extends Activity {
-    
-    /**
-     * Initialization of the Activity after it is first created.  Must at least
-     * call {@link android.app.Activity#setContentView(int)} to
-     * describe what is to be displayed in the screen.
-     */
-    @Override
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+		super.onCreate(savedInstanceState);
+		// 设置自定义FEATURE
+		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+		setContentView(R.layout.custom_title);
+		// 必须出现在setContentView之后，其意思就是告诉系统，自定义的布局是R.layout.custom_title_1
+		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
+				R.layout.custom_title_1);
 
-        requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
-        setContentView(R.layout.custom_title);
-        getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.custom_title_1);
-        
-        final TextView leftText = (TextView) findViewById(R.id.left_text);
-        final TextView rightText = (TextView) findViewById(R.id.right_text);
-        final EditText leftTextEdit = (EditText) findViewById(R.id.left_text_edit);
-        final EditText rightTextEdit = (EditText) findViewById(R.id.right_text_edit);
-        Button leftButton = (Button) findViewById(R.id.left_text_button);
-        Button rightButton = (Button) findViewById(R.id.right_text_button);
-        
-        leftButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                leftText.setText(leftTextEdit.getText());
-            }
-        });
-        rightButton.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                rightText.setText(rightTextEdit.getText());
-            }
-        });
-    }
+		final TextView leftText = (TextView) findViewById(R.id.left_text);
+		final TextView rightText = (TextView) findViewById(R.id.right_text);
+		final EditText leftTextEdit = (EditText) findViewById(R.id.left_text_edit);
+		final EditText rightTextEdit = (EditText) findViewById(R.id.right_text_edit);
+		Button leftButton = (Button) findViewById(R.id.left_text_button);
+		Button rightButton = (Button) findViewById(R.id.right_text_button);
+
+		leftButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				// 设置左侧TextView文字
+				leftText.setText(leftTextEdit.getText());
+			}
+		});
+		rightButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				// 设置右侧TextView文字
+				rightText.setText(rightTextEdit.getText());
+			}
+		});
+	}
 }

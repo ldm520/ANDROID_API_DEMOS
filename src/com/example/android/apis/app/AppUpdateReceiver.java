@@ -24,11 +24,16 @@ import android.content.Intent;
 import android.widget.Toast;
 
 /**
- * Executed when a new version of the application is is installed.
+ * APP更新广播，有更新时会Toast提示
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-10 下午3:04:13
  */
 public class AppUpdateReceiver extends BroadcastReceiver {
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        Toast.makeText(context, R.string.app_update_received, Toast.LENGTH_SHORT).show();
-    }
+	@Override
+	public void onReceive(Context context, Intent intent) {
+		Toast.makeText(context, R.string.app_update_received,
+				Toast.LENGTH_SHORT).show();
+	}
 }
