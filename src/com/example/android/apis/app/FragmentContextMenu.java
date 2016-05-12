@@ -31,47 +31,62 @@ import android.widget.Toast;
 import com.example.android.apis.R;
 
 /**
- * Demonstration of displaying a context menu from a fragment.
+ * Fragment中实现上下文菜单功能
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-12 下午3:54:49
  */
 public class FragmentContextMenu extends Activity {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
-        // Create the list fragment and add it as our sole content.
-        ContextMenuFragment content = new ContextMenuFragment();
-        getFragmentManager().beginTransaction().add(android.R.id.content, content).commit();
-    }
+		// 创建ContextMenuFragment对象，并将其作为activity中唯一的内容
+		ContextMenuFragment content = new ContextMenuFragment();
+		getFragmentManager().beginTransaction()
+				.add(android.R.id.content, content).commit();
+	}
 
-    public static class ContextMenuFragment extends Fragment {
+	public static class ContextMenuFragment extends Fragment {
 
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View root = inflater.inflate(R.layout.fragment_context_menu, container, false);
-            registerForContextMenu(root.findViewById(R.id.long_press));
-            return root;
-        }
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container,
+				Bundle savedInstanceState) {
+			// 关联界面
+			View root = inflater.inflate(R.layout.fragment_context_menu,
+					container, false);
+			// 注册上下文菜单
+			registerForContextMenu(root.findViewById(R.id.long_press));
+			return root;
+		}
 
-        @Override
-        public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-            super.onCreateContextMenu(menu, v, menuInfo);
-            menu.add(Menu.NONE, R.id.a_item, Menu.NONE, "Menu A");
-            menu.add(Menu.NONE, R.id.b_item, Menu.NONE, "Menu B");
-        }
+		@Override
+		public void onCreateContextMenu(ContextMenu menu, View v,
+				ContextMenuInfo menuInfo) {
+			super.onCreateContextMenu(menu, v, menuInfo);
+			// 添加菜单
+			menu.add(Menu.NONE, R.id.a_item, Menu.NONE, "Menu A");
+			menu.add(Menu.NONE, R.id.b_item, Menu.NONE, "Menu B");
+		}
 
-        @Override
-        public boolean onContextItemSelected(MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.a_item:
-                    Toast.makeText(getActivity(), "Item 1a was chosen", Toast.LENGTH_SHORT).show();
-                    return true;
-                case R.id.b_item:
-                    Toast.makeText(getActivity(), "Item 1b was chosen", Toast.LENGTH_SHORT).show();
-                    return true;
-            }
-            return super.onContextItemSelected(item);
-        }
-    }
+		/**
+		 * 菜单点击事件
+		 */
+		@Override
+		public boolean onContextItemSelected(MenuItem item) {
+			switch (item.getItemId()) {
+			case R.id.a_item:
+				Toast.makeText(getActivity(), "Item 1a was chosen",
+						Toast.LENGTH_SHORT).show();
+				return true;
+			case R.id.b_item:
+				Toast.makeText(getActivity(), "Item 1b was chosen",
+						Toast.LENGTH_SHORT).show();
+				return true;
+			}
+			return super.onContextItemSelected(item);
+		}
+	}
 }

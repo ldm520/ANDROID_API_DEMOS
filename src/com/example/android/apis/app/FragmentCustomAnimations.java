@@ -16,116 +16,108 @@
 
 package com.example.android.apis.app;
 
-import com.example.android.apis.R;
-
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.example.android.apis.R;
+
 /**
- * Demonstrates the use of custom animations in a FragmentTransaction when
- * pushing and popping a stack.
+ * 自定义Fragment切换动画
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-12 下午3:56:54
  */
 public class FragmentCustomAnimations extends Activity {
-    int mStackLevel = 1;
+	int mStackLevel = 1;
+	private Button button;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_stack);
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.fragment_stack);
+		// 初化控件及设备监听
+		button = (Button) findViewById(R.id.new_fragment);
+		button.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				//
+				addFragmentToStack();
+			}
+		});
 
-        // Watch for button clicks.
-        Button button = (Button)findViewById(R.id.new_fragment);
-        button.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                addFragmentToStack();
-            }
-        });
+		if (savedInstanceState == null) {
+			// Do first time initialization -- add initial fragment.
+			Fragment newFragment = CountingFragment.newInstance(mStackLevel);
+			FragmentTransaction ft = getFragmentManager().beginTransaction();
+			ft.add(R.id.simple_fragment, newFragment).commit();
+		} else {
+			mStackLevel = savedInstanceState.getInt("level");
+		}
+	}
 
-        if (savedInstanceState == null) {
-            // Do first time initialization -- add initial fragment.
-            Fragment newFragment = CountingFragment.newInstance(mStackLevel);
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
-            ft.add(R.id.simple_fragment, newFragment).commit();
-        } else {
-            mStackLevel = savedInstanceState.getInt("level");
-        }
-    }
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putInt("level", mStackLevel);
+	}
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt("level", mStackLevel);
-    }
+	void addFragmentToStack() {
+		mStackLevel++;
 
+		Fragment newFragment = CountingFragment.newInstance(mStackLevel);
 
-    void addFragmentToStack() {
-        mStackLevel++;
+		// FragmentTransaction对fragment进行添加,移除,替换,以及执行其他动作。
+		FragmentTransaction ft = getFragmentManager().beginTransaction();
+		// 设置自定义动画
+		ft.setCustomAnimations(R.animator.fragment_slide_left_enter,
+				R.animator.fragment_slide_left_exit,
+				R.animator.fragment_slide_right_enter,
+				R.animator.fragment_slide_right_exit);
+		ft.replace(R.id.simple_fragment, newFragment);
+		/**
+		 * 在调用commit()之前, 你可能想调用 addToBackStack(),将事务添加到一个fragment事务的back stack.
+		 * 这个back stack由activity管理, 并允许用户通过按下 BACK 按键返回到前一个fragment状态.
+		 */
+		ft.addToBackStack(null);
+		ft.commit();
+	}
 
-        // Instantiate a new fragment.
-        Fragment newFragment = CountingFragment.newInstance(mStackLevel);
+	public static class CountingFragment extends Fragment {
+		int mNum;
 
-        // Add the fragment to the activity, pushing this transaction
-        // on to the back stack.
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.setCustomAnimations(R.animator.fragment_slide_left_enter,
-                R.animator.fragment_slide_left_exit,
-                R.animator.fragment_slide_right_enter,
-                R.animator.fragment_slide_right_exit);
-        ft.replace(R.id.simple_fragment, newFragment);
-        ft.addToBackStack(null);
-        ft.commit();
-    }
+		static CountingFragment newInstance(int num) {
+			CountingFragment f = new CountingFragment();
+			Bundle args = new Bundle();
+			args.putInt("num", num);
+			f.setArguments(args);
 
+			return f;
+		}
 
+		@Override
+		public void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
+			mNum = getArguments() != null ? getArguments().getInt("num") : 1;
+		}
 
-    public static class CountingFragment extends Fragment {
-        int mNum;
-
-        /**
-         * Create a new instance of CountingFragment, providing "num"
-         * as an argument.
-         */
-        static CountingFragment newInstance(int num) {
-            CountingFragment f = new CountingFragment();
-
-            // Supply num input as an argument.
-            Bundle args = new Bundle();
-            args.putInt("num", num);
-            f.setArguments(args);
-
-            return f;
-        }
-
-        /**
-         * When creating, retrieve this instance's number from its arguments.
-         */
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            mNum = getArguments() != null ? getArguments().getInt("num") : 1;
-        }
-
-        /**
-         * The Fragment's UI is just a simple text view showing its
-         * instance number.
-         */
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View v = inflater.inflate(R.layout.hello_world, container, false);
-            View tv = v.findViewById(R.id.text);
-            ((TextView)tv).setText("Fragment #" + mNum);
-            tv.setBackgroundDrawable(getResources().getDrawable(android.R.drawable.gallery_thumb));
-            return v;
-        }
-    }
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container,
+				Bundle savedInstanceState) {
+			View v = inflater.inflate(R.layout.hello_world, container, false);
+			View tv = v.findViewById(R.id.text);
+			((TextView) tv).setText("Fragment #" + mNum);
+			tv.setBackgroundDrawable(getResources().getDrawable(
+					android.R.drawable.gallery_thumb));
+			return v;
+		}
+	}
 
 }

@@ -31,83 +31,105 @@ import android.widget.Button;
 import android.widget.TextView;
 
 /**
- * Demonstration of hiding and showing fragments.
+ * 动态实现Fragment的显示与隐藏
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-12 下午5:15:44
  */
 public class FragmentHideShow extends Activity {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_hide_show);
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.fragment_hide_show);
+		// 实例化FragmentManager
+		FragmentManager fm = getFragmentManager();
+		addShowHideListener(R.id.frag1hide, fm.findFragmentById(R.id.fragment1));
+		addShowHideListener(R.id.frag2hide, fm.findFragmentById(R.id.fragment2));
+	}
 
-        // The content view embeds two fragments; now retrieve them and attach
-        // their "hide" button.
-        FragmentManager fm = getFragmentManager();
-        addShowHideListener(R.id.frag1hide, fm.findFragmentById(R.id.fragment1));
-        addShowHideListener(R.id.frag2hide, fm.findFragmentById(R.id.fragment2));
-    }
+	/**
+	 * 隐藏或显示监听
+	 * 
+	 * @description：
+	 * @author ldm
+	 * @date 2016-5-12 下午5:18:05
+	 */
+	void addShowHideListener(int buttonId, final Fragment fragment) {
+		// 初始化Button
+		final Button button = (Button) findViewById(buttonId);
+		button.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				FragmentTransaction ft = getFragmentManager()
+						.beginTransaction();
+				// 设置动画
+				ft.setCustomAnimations(android.R.animator.fade_in,
+						android.R.animator.fade_out);
+				// 根据Fragment的状态设置对应Button文字
+				if (fragment.isHidden()) {
+					ft.show(fragment);
+					button.setText("Hide");
+				} else {
+					ft.hide(fragment);
+					button.setText("Show");
+				}
+				ft.commit();
+			}
+		});
+	}
 
-    void addShowHideListener(int buttonId, final Fragment fragment) {
-        final Button button = (Button)findViewById(buttonId);
-        button.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                FragmentTransaction ft = getFragmentManager().beginTransaction();
-                ft.setCustomAnimations(android.R.animator.fade_in,
-                        android.R.animator.fade_out);
-                if (fragment.isHidden()) {
-                    ft.show(fragment);
-                    button.setText("Hide");
-                } else {
-                    ft.hide(fragment);
-                    button.setText("Show");
-                }
-                ft.commit();
-            }
-        });
-    }
+	/**
+	 * 这个Fragment是放在布局文件中的
+	 * 
+	 * @description：
+	 * @author ldm
+	 * @date 2016-5-12 下午5:22:54
+	 */
+	public static class FirstFragment extends Fragment {
+		TextView mTextView;
 
-    public static class FirstFragment extends Fragment {
-        TextView mTextView;
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container,
+				Bundle savedInstanceState) {
+			View v = inflater.inflate(R.layout.labeled_text_edit, container,
+					false);
+			View tv = v.findViewById(R.id.msg);
+			((TextView) tv)
+					.setText("The fragment saves and restores this text.");
+			mTextView = (TextView) v.findViewById(R.id.saved);
+			if (savedInstanceState != null) {
+				mTextView.setText(savedInstanceState.getCharSequence("text"));
+			}
+			return v;
+		}
 
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View v = inflater.inflate(R.layout.labeled_text_edit, container, false);
-            View tv = v.findViewById(R.id.msg);
-            ((TextView)tv).setText("The fragment saves and restores this text.");
+		@Override
+		public void onSaveInstanceState(Bundle outState) {
+			super.onSaveInstanceState(outState);
+			outState.putCharSequence("text", mTextView.getText());
+		}
+	}
 
-            // Retrieve the text editor, and restore the last saved state if needed.
-            mTextView = (TextView)v.findViewById(R.id.saved);
-            if (savedInstanceState != null) {
-                mTextView.setText(savedInstanceState.getCharSequence("text"));
-            }
-            return v;
-        }
+	/**
+	 * 这个Fragment也是放在布局文件中的
+	 * 
+	 * @description：
+	 * @author ldm
+	 * @date 2016-5-12 下午5:22:54
+	 */
+	public static class SecondFragment extends Fragment {
 
-        @Override
-        public void onSaveInstanceState(Bundle outState) {
-            super.onSaveInstanceState(outState);
-
-            // Remember the current text, to restore if we later restart.
-            outState.putCharSequence("text", mTextView.getText());
-        }
-    }
-
-    public static class SecondFragment extends Fragment {
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View v = inflater.inflate(R.layout.labeled_text_edit, container, false);
-            View tv = v.findViewById(R.id.msg);
-            ((TextView)tv).setText("The TextView saves and restores this text.");
-
-            // Retrieve the text editor and tell it to save and restore its state.
-            // Note that you will often set this in the layout XML, but since
-            // we are sharing our layout with the other fragment we will customize
-            // it here.
-            ((TextView)v.findViewById(R.id.saved)).setSaveEnabled(true);
-            return v;
-        }
-    }
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container,
+				Bundle savedInstanceState) {
+			View v = inflater.inflate(R.layout.labeled_text_edit, container,
+					false);
+			View tv = v.findViewById(R.id.msg);
+			((TextView) tv)
+					.setText("The TextView saves and restores this text.");
+			((TextView) v.findViewById(R.id.saved)).setSaveEnabled(true);
+			return v;
+		}
+	}
 }

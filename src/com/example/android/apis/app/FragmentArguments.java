@@ -30,79 +30,91 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 /**
- * Demonstrates a fragment that can be configured through both Bundle arguments
- * and layout attributes.
+ * Frament通过Bundle传递数据
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-12 下午2:09:07
  */
 public class FragmentArguments extends Activity {
 
-    @Override protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_arguments);
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.fragment_arguments);
+		if (savedInstanceState == null) {
+			FragmentTransaction ft = getFragmentManager().beginTransaction();
+			// 首次初始化，在Activity创建Fragment
+			Fragment newFragment = MyFragment.newInstance("From Arguments");
+			// 添加Fragment
+			ft.add(R.id.created, newFragment);
+			// 添加后要执行commit()才有效
+			ft.commit();
+		}
+	}
 
-        if (savedInstanceState == null) {
-            // First-time init; create fragment to embed in activity.
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
-            Fragment newFragment = MyFragment.newInstance("From Arguments");
-            ft.add(R.id.created, newFragment);
-            ft.commit();
-        }
-    }
+	public static class MyFragment extends Fragment {
+		CharSequence mLabel;
 
+		/**
+		 * 创建MyFragment
+		 * 
+		 * @description：
+		 * @author ldm
+		 * @date 2016-5-12 下午2:14:25
+		 */
+		static MyFragment newInstance(CharSequence label) {
+			MyFragment f = new MyFragment();
+			Bundle b = new Bundle();
+			// 设置数据
+			b.putCharSequence("label", label);
+			// 传递Bundle
+			f.setArguments(b);
+			return f;
+		}
 
+		/**
+		 * 在Activity.onCreate方法之前调用，可以获取除了View之外的资源
+		 */
+		@Override
+		public void onInflate(Activity activity, AttributeSet attrs,
+				Bundle savedInstanceState) {
+			super.onInflate(activity, attrs, savedInstanceState);
+			// 自定义属性
+			TypedArray a = activity.obtainStyledAttributes(attrs,
+					R.styleable.FragmentArguments);
+			mLabel = a.getText(R.styleable.FragmentArguments_android_label);
+			a.recycle();
+		}
 
-    public static class MyFragment extends Fragment {
-        CharSequence mLabel;
+		/**
+		 * on Attach 执行完后会立刻调用此方法，通常被用于读取保存的状态值，获取或者初始化一些数据
+		 */
+		@Override
+		public void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
 
-        /**
-         * Create a new instance of MyFragment that will be initialized
-         * with the given arguments.
-         */
-        static MyFragment newInstance(CharSequence label) {
-            MyFragment f = new MyFragment();
-            Bundle b = new Bundle();
-            b.putCharSequence("label", label);
-            f.setArguments(b);
-            return f;
-        }
+			Bundle args = getArguments();
+			if (args != null) {
+				mLabel = args.getCharSequence("label", mLabel);
+			}
+		}
 
-        /**
-         * Parse attributes during inflation from a view hierarchy into the
-         * arguments we handle.
-         */
-        @Override public void onInflate(Activity activity, AttributeSet attrs,
-                Bundle savedInstanceState) {
-            super.onInflate(activity, attrs, savedInstanceState);
-
-            TypedArray a = activity.obtainStyledAttributes(attrs,
-                    R.styleable.FragmentArguments);
-            mLabel = a.getText(R.styleable.FragmentArguments_android_label);
-            a.recycle();
-        }
-
-        /**
-         * During creation, if arguments have been supplied to the fragment
-         * then parse those out.
-         */
-        @Override public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-
-            Bundle args = getArguments();
-            if (args != null) {
-                mLabel = args.getCharSequence("label", mLabel);
-            }
-        }
-
-        /**
-         * Create the view for this fragment, using the arguments given to it.
-         */
-        @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View v = inflater.inflate(R.layout.hello_world, container, false);
-            View tv = v.findViewById(R.id.text);
-            ((TextView)tv).setText(mLabel != null ? mLabel : "(no label)");
-            tv.setBackgroundDrawable(getResources().getDrawable(android.R.drawable.gallery_thumb));
-            return v;
-        }
-    }
+		/**
+		 * 创建 Fra gment 中显示的 view, 其中 inflater 用来装载布局文件， container 表示 <fragment>
+		 * 标签的父标签对应的 ViewGroup 对象， savedInstanceState 可以获取 Fragment 保存的状态
+		 */
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container,
+				Bundle savedInstanceState) {
+			//获取xml布局
+			View v = inflater.inflate(R.layout.hello_world, container, false);
+			View tv = v.findViewById(R.id.text);
+			((TextView) tv).setText(mLabel != null ? mLabel : "(no label)");
+			tv.setBackgroundDrawable(getResources().getDrawable(
+					android.R.drawable.gallery_thumb));
+			return v;
+		}
+	}
 
 }

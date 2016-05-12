@@ -27,16 +27,20 @@ import android.view.View;
 import android.view.ViewGroup;
 
 /**
- * Demonstrates a fragment that can be configured through both Bundle arguments
- * and layout attributes.
+ * Fragment嵌套
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-12 下午3:50:34
  */
+@SuppressLint("NewApi")
 public class FragmentArgumentsFragment extends Fragment {
-	@SuppressLint("NewApi") @Override
+	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		if (savedInstanceState == null) {
-			// First-time init; create fragment to embed in activity.
+			// Fragment里面嵌套Fragment 的话：一定要用getChildFragmentManager();
 			FragmentTransaction ft = getChildFragmentManager()
 					.beginTransaction();
 			Fragment newFragment = FragmentArguments.MyFragment

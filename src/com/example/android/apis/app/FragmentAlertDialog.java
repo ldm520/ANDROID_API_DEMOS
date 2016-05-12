@@ -31,79 +31,89 @@ import android.widget.Button;
 import android.widget.TextView;
 
 /**
- * Demonstrates how to show an AlertDialog that is managed by a Fragment.
+ * 使用DialogFragment创建对话框
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-12 下午2:00:01
  */
 public class FragmentAlertDialog extends Activity {
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.fragment_dialog);
+		View tv = findViewById(R.id.text);
+		((TextView) tv)
+				.setText("Example of displaying an alert dialog with a DialogFragment");
+		// 初始化Button及设置监听
+		Button button = (Button) findViewById(R.id.show);
+		button.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				// 弹出对话框
+				showDialog();
+			}
+		});
+	}
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_dialog);
+	void showDialog() {
+		// DialogFragment 创建对话框
+		DialogFragment newFragment = MyAlertDialogFragment
+				.newInstance(R.string.alert_dialog_two_buttons_title);
+		newFragment.show(getFragmentManager(), "dialog");
+	}
 
-        View tv = findViewById(R.id.text);
-        ((TextView)tv).setText("Example of displaying an alert dialog with a DialogFragment");
+	public void doPositiveClick() {
+		Log.i("FragmentAlertDialog", "Positive click!");
+	}
 
-        // Watch for button clicks.
-        Button button = (Button)findViewById(R.id.show);
-        button.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                showDialog();
-            }
-        });
-    }
+	public void doNegativeClick() {
+		Log.i("FragmentAlertDialog", "Negative click!");
+	}
 
+	/**
+	 * 自定义弹出对话框DialogFragmet
+	 * 
+	 * @description：
+	 * @author ldm
+	 * @date 2016-5-12 下午1:54:31
+	 */
+	public static class MyAlertDialogFragment extends DialogFragment {
 
-    void showDialog() {
-        DialogFragment newFragment = MyAlertDialogFragment.newInstance(
-                R.string.alert_dialog_two_buttons_title);
-        newFragment.show(getFragmentManager(), "dialog");
-    }
+		public static MyAlertDialogFragment newInstance(int title) {
+			MyAlertDialogFragment frag = new MyAlertDialogFragment();
+			Bundle args = new Bundle();
+			args.putInt("title", title);
+			frag.setArguments(args);
+			return frag;
+		}
 
-    public void doPositiveClick() {
-        // Do stuff here.
-        Log.i("FragmentAlertDialog", "Positive click!");
-    }
-    
-    public void doNegativeClick() {
-        // Do stuff here.
-        Log.i("FragmentAlertDialog", "Negative click!");
-    }
-
-    
-
-    public static class MyAlertDialogFragment extends DialogFragment {
-
-        public static MyAlertDialogFragment newInstance(int title) {
-            MyAlertDialogFragment frag = new MyAlertDialogFragment();
-            Bundle args = new Bundle();
-            args.putInt("title", title);
-            frag.setArguments(args);
-            return frag;
-        }
-        
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            int title = getArguments().getInt("title");
-            
-            return new AlertDialog.Builder(getActivity())
-                    .setIcon(R.drawable.alert_dialog_icon)
-                    .setTitle(title)
-                    .setPositiveButton(R.string.alert_dialog_ok,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                ((FragmentAlertDialog)getActivity()).doPositiveClick();
-                            }
-                        }
-                    )
-                    .setNegativeButton(R.string.alert_dialog_cancel,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                ((FragmentAlertDialog)getActivity()).doNegativeClick();
-                            }
-                        }
-                    )
-                    .create();
-        }
-    }
+		/**
+		 * DialogFragment需要实现onCreateView或者onCreateDIalog方法。
+		 * onCreateView():使用定义的xml布局文件展示Dialog。
+		 * onCreateDialog():利用AlertDialog或者Dialog创建出Dialog。
+		 */
+		@Override
+		public Dialog onCreateDialog(Bundle savedInstanceState) {
+			int title = getArguments().getInt("title");
+			return new AlertDialog.Builder(getActivity())// 创建一个Dialog
+					.setIcon(R.drawable.alert_dialog_icon)// 设置图标
+					.setTitle(title)// 设置标题
+					.setPositiveButton(R.string.alert_dialog_ok,
+							new DialogInterface.OnClickListener() {// 确认（OK）按钮
+								public void onClick(DialogInterface dialog,
+										int whichButton) {
+									((FragmentAlertDialog) getActivity())
+											.doPositiveClick();
+								}
+							}).setNegativeButton(R.string.alert_dialog_cancel,// 取消（Cancel）按钮
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int whichButton) {
+									((FragmentAlertDialog) getActivity())
+											.doNegativeClick();
+								}
+							}).create();
+		}
+	}
 
 }
