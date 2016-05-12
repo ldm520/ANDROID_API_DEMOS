@@ -30,57 +30,53 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 /**
- * <h3>Dialog Activity</h3>
- *
- * <p>This demonstrates the how to write an activity that looks like
- * a pop-up dialog.</p>
+ * Dialog样式的Activity
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-11 下午4:58:50
  */
 public class DialogActivity extends Activity {
-    /**
-     * Initialization of the Activity after it is first created.  Must at least
-     * call {@link android.app.Activity#setContentView setContentView()} to
-     * describe what is to be displayed in the screen.
-     */
-    @Override
+
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-        // Be sure to call the super class.
-        super.onCreate(savedInstanceState);
+		// Be sure to call the super class.
+		super.onCreate(savedInstanceState);
+		// 标题栏左侧的图标
+		requestWindowFeature(Window.FEATURE_LEFT_ICON);
+		setContentView(R.layout.dialog_activity);
+		// 设置标题
+		getWindow().setTitle("This is just a test");
+		// 设置图片资源
+		getWindow().setFeatureDrawableResource(Window.FEATURE_LEFT_ICON,
+				android.R.drawable.ic_dialog_alert);
 
-        requestWindowFeature(Window.FEATURE_LEFT_ICON);
+		Button button = (Button) findViewById(R.id.add);
+		button.setOnClickListener(mAddContentListener);
+		button = (Button) findViewById(R.id.remove);
+		button.setOnClickListener(mRemoveContentListener);
+	}
 
+	private OnClickListener mAddContentListener = new OnClickListener() {
+		public void onClick(View v) {
+			// 添加ImageView
+			LinearLayout layout = (LinearLayout) findViewById(R.id.inner_content);
+			ImageView iv = new ImageView(DialogActivity.this);
+			iv.setImageDrawable(getResources().getDrawable(
+					R.drawable.icon48x48_1));
+			iv.setPadding(4, 4, 4, 4);
+			layout.addView(iv);
+		}
+	};
 
-        // See assets/res/any/layout/dialog_activity.xml for this
-        // view layout definition, which is being set here as
-        // the content of our screen.
-        setContentView(R.layout.dialog_activity);
-        getWindow().setTitle("This is just a test");
-
-        getWindow().setFeatureDrawableResource(Window.FEATURE_LEFT_ICON,
-                android.R.drawable.ic_dialog_alert);
-
-        Button button = (Button)findViewById(R.id.add);
-        button.setOnClickListener(mAddContentListener);
-        button = (Button)findViewById(R.id.remove);
-        button.setOnClickListener(mRemoveContentListener);
-    }
-
-    private OnClickListener mAddContentListener = new OnClickListener() {
-        public void onClick(View v) {
-            LinearLayout layout = (LinearLayout)findViewById(R.id.inner_content);
-            ImageView iv = new ImageView(DialogActivity.this);
-            iv.setImageDrawable(getResources().getDrawable(R.drawable.icon48x48_1));
-            iv.setPadding(4, 4, 4, 4);
-            layout.addView(iv);
-        }
-    };
-
-    private OnClickListener mRemoveContentListener = new OnClickListener() {
-        public void onClick(View v) {
-            LinearLayout layout = (LinearLayout)findViewById(R.id.inner_content);
-            int num = layout.getChildCount();
-            if (num > 0) {
-                layout.removeViewAt(num-1);
-            }
-        }
-    };
+	private OnClickListener mRemoveContentListener = new OnClickListener() {
+		public void onClick(View v) {
+			// 移出ImageView
+			LinearLayout layout = (LinearLayout) findViewById(R.id.inner_content);
+			int num = layout.getChildCount();
+			if (num > 0) {
+				layout.removeViewAt(num - 1);
+			}
+		}
+	};
 }

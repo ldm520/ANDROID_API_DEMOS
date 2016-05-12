@@ -37,204 +37,176 @@ import java.lang.reflect.Method;
 import com.example.android.apis.R;
 
 /**
- * This is an example of implementing an application service that can
- * run in the "foreground".  It shows how to code this to work well by using
- * the improved Android 2.0 APIs when available and otherwise falling back
- * to the original APIs.  Yes: you can take this exact code, compile it
- * against the Android 2.0 SDK, and it will against everything down to
- * Android 1.0.
+ * 前台运行的Service
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-12 上午11:22:40
  */
 public class ForegroundService extends Service {
-    static final String ACTION_FOREGROUND = "com.example.android.apis.FOREGROUND";
-    static final String ACTION_BACKGROUND = "com.example.android.apis.BACKGROUND";
-    
+	// 定义ACTION
+	static final String ACTION_FOREGROUND = "com.example.android.apis.FOREGROUND";
+	static final String ACTION_BACKGROUND = "com.example.android.apis.BACKGROUND";
+	// 反射获取类名
 
-    private static final Class<?>[] mSetForegroundSignature = new Class[] {
-        boolean.class};
-    private static final Class<?>[] mStartForegroundSignature = new Class[] {
-        int.class, Notification.class};
-    private static final Class<?>[] mStopForegroundSignature = new Class[] {
-        boolean.class};
-    
-    private NotificationManager mNM;
-    private Method mSetForeground;
-    private Method mStartForeground;
-    private Method mStopForeground;
-    private Object[] mSetForegroundArgs = new Object[1];
-    private Object[] mStartForegroundArgs = new Object[2];
-    private Object[] mStopForegroundArgs = new Object[1];
-    
-    void invokeMethod(Method method, Object[] args) {
-        try {
-            method.invoke(this, args);
-        } catch (InvocationTargetException e) {
-            // Should not happen.
-            Log.w("ApiDemos", "Unable to invoke method", e);
-        } catch (IllegalAccessException e) {
-            // Should not happen.
-            Log.w("ApiDemos", "Unable to invoke method", e);
-        }
-    }
-    
-    /**
-     * This is a wrapper around the new startForeground method, using the older
-     * APIs if it is not available.
-     */
-    void startForegroundCompat(int id, Notification notification) {
-        // If we have the new startForeground API, then use it.
-        if (mStartForeground != null) {
-            mStartForegroundArgs[0] = Integer.valueOf(id);
-            mStartForegroundArgs[1] = notification;
-            invokeMethod(mStartForeground, mStartForegroundArgs);
-            return;
-        }
-        
-        // Fall back on the old API.
-        mSetForegroundArgs[0] = Boolean.TRUE;
-        invokeMethod(mSetForeground, mSetForegroundArgs);
-        mNM.notify(id, notification);
-    }
-    
-    /**
-     * This is a wrapper around the new stopForeground method, using the older
-     * APIs if it is not available.
-     */
-    void stopForegroundCompat(int id) {
-        // If we have the new stopForeground API, then use it.
-        if (mStopForeground != null) {
-            mStopForegroundArgs[0] = Boolean.TRUE;
-            invokeMethod(mStopForeground, mStopForegroundArgs);
-            return;
-        }
-        
-        // Fall back on the old API.  Note to cancel BEFORE changing the
-        // foreground state, since we could be killed at that point.
-        mNM.cancel(id);
-        mSetForegroundArgs[0] = Boolean.FALSE;
-        invokeMethod(mSetForeground, mSetForegroundArgs);
-    }
-    
-    @Override
-    public void onCreate() {
-        mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-        try {
-            mStartForeground = getClass().getMethod("startForeground",
-                    mStartForegroundSignature);
-            mStopForeground = getClass().getMethod("stopForeground",
-                    mStopForegroundSignature);
-            return;
-        } catch (NoSuchMethodException e) {
-            // Running on an older platform.
-            mStartForeground = mStopForeground = null;
-        }
-        try {
-            mSetForeground = getClass().getMethod("setForeground",
-                    mSetForegroundSignature);
-        } catch (NoSuchMethodException e) {
-            throw new IllegalStateException(
-                    "OS doesn't have Service.startForeground OR Service.setForeground!");
-        }
-    }
+	private static final Class<?>[] mSetForegroundSignature = new Class[] { boolean.class };
+	private static final Class<?>[] mStartForegroundSignature = new Class[] {
+			int.class, Notification.class };
+	private static final Class<?>[] mStopForegroundSignature = new Class[] { boolean.class };
+	// 通知管理对象
+	private NotificationManager mNM;
+	private Method mSetForeground;
+	private Method mStartForeground;
+	private Method mStopForeground;
+	private Object[] mSetForegroundArgs = new Object[1];
+	private Object[] mStartForegroundArgs = new Object[2];
+	private Object[] mStopForegroundArgs = new Object[1];
 
-    @Override
-    public void onDestroy() {
-        // Make sure our notification is gone.
-        stopForegroundCompat(R.string.foreground_service_started);
-    }
+	// 实现动态调用
+	void invokeMethod(Method method, Object[] args) {
+		try {
+			method.invoke(this, args);
+		} catch (InvocationTargetException e) {
+			Log.w("ApiDemos", "Unable to invoke method", e);
+		} catch (IllegalAccessException e) {
+			Log.w("ApiDemos", "Unable to invoke method", e);
+		}
+	}
+
+	// 启动前台运行
+	void startForegroundCompat(int id, Notification notification) {
+		if (mStartForeground != null) {
+			mStartForegroundArgs[0] = Integer.valueOf(id);
+			mStartForegroundArgs[1] = notification;
+			invokeMethod(mStartForeground, mStartForegroundArgs);
+			return;
+		}
+
+		mSetForegroundArgs[0] = Boolean.TRUE;
+		invokeMethod(mSetForeground, mSetForegroundArgs);
+		mNM.notify(id, notification);
+	}
+
+	/**
+	 * 停止关前台服务
+	 * 
+	 * @description：
+	 * @author ldm
+	 * @date 2016-5-12 上午11:30:51
+	 */
+	void stopForegroundCompat(int id) {
+		if (mStopForeground != null) {
+			mStopForegroundArgs[0] = Boolean.TRUE;
+			invokeMethod(mStopForeground, mStopForegroundArgs);
+			return;
+		}
+		mNM.cancel(id);
+		mSetForegroundArgs[0] = Boolean.FALSE;
+		invokeMethod(mSetForeground, mSetForegroundArgs);
+	}
+
+	@Override
+	public void onCreate() {
+		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		try {
+			mStartForeground = getClass().getMethod("startForeground",
+					mStartForegroundSignature);
+			mStopForeground = getClass().getMethod("stopForeground",
+					mStopForegroundSignature);
+			return;
+		} catch (NoSuchMethodException e) {
+			mStartForeground = mStopForeground = null;
+		}
+		try {
+			mSetForeground = getClass().getMethod("setForeground",
+					mSetForegroundSignature);
+		} catch (NoSuchMethodException e) {
+			throw new IllegalStateException(
+					"OS doesn't have Service.startForeground OR Service.setForeground!");
+		}
+	}
+
+	@Override
+	public void onDestroy() {
+		//stopForeground
+		stopForegroundCompat(R.string.foreground_service_started);
+	}
+
+	@Override
+	public void onStart(Intent intent, int startId) {
+		handleCommand(intent);
+	}
+
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		handleCommand(intent);
+		// 表示系统Kill这个Service之后，如果重新创建这个Service时在调用onStartCommand
+		// ，不会将最后的Intent作为参数传入，也就是说intent=null.
+		// START_REDELIVER_INTENT则会传入被杀前未处理的最后一个Intent。
+		return START_STICKY;
+	}
+
+	void handleCommand(Intent intent) {
+		if (ACTION_FOREGROUND.equals(intent.getAction())) {
+			CharSequence text = getText(R.string.foreground_service_started);
+			@SuppressWarnings("deprecation")
+			Notification notification = new Notification(
+					R.drawable.stat_sample, text, System.currentTimeMillis());
+			PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
+					new Intent(this, Controller.class), 0);
+			notification.setLatestEventInfo(this,
+					getText(R.string.local_service_label), text, contentIntent);
+
+			startForegroundCompat(R.string.foreground_service_started,
+					notification);
+
+		} else if (ACTION_BACKGROUND.equals(intent.getAction())) {
+			stopForegroundCompat(R.string.foreground_service_started);
+		}
+	}
+
+	@Override
+	public IBinder onBind(Intent intent) {
+		return null;
+	}
 
 
+	public static class Controller extends Activity {
+		@Override
+		protected void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
 
-    // This is the old onStart method that will be called on the pre-2.0
-    // platform.  On 2.0 or later we override onStartCommand() so this
-    // method will not be called.
-    @Override
-    public void onStart(Intent intent, int startId) {
-        handleCommand(intent);
-    }
+			setContentView(R.layout.foreground_service_controller);
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        handleCommand(intent);
-        // We want this service to continue running until it is explicitly
-        // stopped, so return sticky.
-        return START_STICKY;
-    }
+			// Watch for button clicks.
+			Button button = (Button) findViewById(R.id.start_foreground);
+			button.setOnClickListener(mForegroundListener);
+			button = (Button) findViewById(R.id.start_background);
+			button.setOnClickListener(mBackgroundListener);
+			button = (Button) findViewById(R.id.stop);
+			button.setOnClickListener(mStopListener);
+		}
 
+		private OnClickListener mForegroundListener = new OnClickListener() {
+			public void onClick(View v) {
+				Intent intent = new Intent(ForegroundService.ACTION_FOREGROUND);
+				intent.setClass(Controller.this, ForegroundService.class);
+				startService(intent);
+			}
+		};
 
-    void handleCommand(Intent intent) {
-        if (ACTION_FOREGROUND.equals(intent.getAction())) {
-            // In this sample, we'll use the same text for the ticker and the expanded notification
-            CharSequence text = getText(R.string.foreground_service_started);
+		private OnClickListener mBackgroundListener = new OnClickListener() {
+			public void onClick(View v) {
+				Intent intent = new Intent(ForegroundService.ACTION_BACKGROUND);
+				intent.setClass(Controller.this, ForegroundService.class);
+				startService(intent);
+			}
+		};
 
-            // Set the icon, scrolling text and timestamp
-            Notification notification = new Notification(R.drawable.stat_sample, text,
-                    System.currentTimeMillis());
-
-            // The PendingIntent to launch our activity if the user selects this notification
-            PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                    new Intent(this, Controller.class), 0);
-
-            // Set the info for the views that show in the notification panel.
-            notification.setLatestEventInfo(this, getText(R.string.local_service_label),
-                           text, contentIntent);
-            
-            startForegroundCompat(R.string.foreground_service_started, notification);
-            
-        } else if (ACTION_BACKGROUND.equals(intent.getAction())) {
-            stopForegroundCompat(R.string.foreground_service_started);
-        }
-    }
-    
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
-    
-    // ----------------------------------------------------------------------
-
-    /**
-     * <p>Example of explicitly starting and stopping the {@link ForegroundService}.
-     * 
-     * <p>Note that this is implemented as an inner class only keep the sample
-     * all together; typically this code would appear in some separate class.
-     */
-    public static class Controller extends Activity {
-        @Override
-        protected void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-
-            setContentView(R.layout.foreground_service_controller);
-
-            // Watch for button clicks.
-            Button button = (Button)findViewById(R.id.start_foreground);
-            button.setOnClickListener(mForegroundListener);
-            button = (Button)findViewById(R.id.start_background);
-            button.setOnClickListener(mBackgroundListener);
-            button = (Button)findViewById(R.id.stop);
-            button.setOnClickListener(mStopListener);
-        }
-
-        private OnClickListener mForegroundListener = new OnClickListener() {
-            public void onClick(View v) {
-                Intent intent = new Intent(ForegroundService.ACTION_FOREGROUND);
-                intent.setClass(Controller.this, ForegroundService.class);
-                startService(intent);
-            }
-        };
-
-        private OnClickListener mBackgroundListener = new OnClickListener() {
-            public void onClick(View v) {
-                Intent intent = new Intent(ForegroundService.ACTION_BACKGROUND);
-                intent.setClass(Controller.this, ForegroundService.class);
-                startService(intent);
-            }
-        };
-
-        private OnClickListener mStopListener = new OnClickListener() {
-            public void onClick(View v) {
-                stopService(new Intent(Controller.this,
-                        ForegroundService.class));
-            }
-        };
-    }
+		private OnClickListener mStopListener = new OnClickListener() {
+			public void onClick(View v) {
+				stopService(new Intent(Controller.this, ForegroundService.class));
+			}
+		};
+	}
 }

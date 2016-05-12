@@ -20,8 +20,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+/**
+ * 空广播：啥事都没做
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-12 上午11:14:53
+ */
 public class DoNothing extends BroadcastReceiver {
-    @Override
-    public void onReceive(Context context, Intent intent) {
-    }
+	@Override
+	public void onReceive(Context context, Intent intent) {
+	}
 }
