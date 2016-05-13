@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2011 Google Inc.
+<!--
+     Copyright (C) 2011 Google Inc.
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,16 +14,17 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <item android:id="@+id/menu_item_action_provider_action_bar"
+    <item
+        android:id="@+id/menu_item_action_provider_action_bar"
+        android:actionProviderClass="com.example.android.apis.app.ActionBarSettingsActionProviderActivity$SettingsActionProvider"
         android:showAsAction="ifRoom"
-        android:title="@string/action_bar_settings"
-        android:actionProviderClass="com.example.android.apis.app.ActionBarSettingsActionProviderActivity$SettingsActionProvider"/>
-
-    <item android:id="@+id/menu_item_action_provider_overflow"
+        android:title="@string/action_bar_settings"/>
+    <item
+        android:id="@+id/menu_item_action_provider_overflow"
+        android:actionProviderClass="com.example.android.apis.app.ActionBarSettingsActionProviderActivity$SettingsActionProvider"
         android:showAsAction="never"
-        android:title="@string/action_bar_settings"
-        android:actionProviderClass="com.example.android.apis.app.ActionBarSettingsActionProviderActivity$SettingsActionProvider"/>
+        android:title="@string/action_bar_settings"/>
 
 </menu>

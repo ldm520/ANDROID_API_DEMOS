@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2010 The Android Open Source Project
+<!--
+     Copyright (C) 2010 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,32 +16,35 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="8dp">
+    android:orientation="vertical"
+    android:padding="8dp" >
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="@string/fragment_retain_instance_msg" />
+        android:text="@string/fragment_retain_instance_msg"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <ProgressBar android:id="@+id/progress_horizontal"
+    <ProgressBar
+        android:id="@+id/progress_horizontal"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="200dip"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:padding="6dp"
-        android:max="500" />
+        android:max="500"
+        android:padding="6dp" />
 
-    <Button android:id="@+id/restart"
+    <Button
+        android:id="@+id/restart"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="@string/restart">
+        android:text="@string/restart" >
+
         <requestFocus />
     </Button>
-    
+
 </LinearLayout>

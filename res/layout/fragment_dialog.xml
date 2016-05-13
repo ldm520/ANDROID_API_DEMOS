@@ -13,6 +13,7 @@
         android:layout_gravity="center_vertical|center_horizontal"
         android:layout_weight="1"
         android:gravity="top|center_horizontal"
+        android:text="Example of displaying an alert dialog with a DialogFragment"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <Button
