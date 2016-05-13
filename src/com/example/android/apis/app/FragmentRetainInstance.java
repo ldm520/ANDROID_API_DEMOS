@@ -30,203 +30,171 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 
 /**
- * This example shows how you can use a Fragment to easily propagate state
- * (such as threads) across activity instances when an activity needs to be
- * restarted due to, for example, a configuration change.  This is a lot
- * easier than using the raw Activity.onRetainNonConfiguratinInstance() API.
+ * 通过Fragment保存状态。
+ * 通常在Activity销毁时和Activity关联的Fragment也会被销毁。当Activity重建时会自动创建相关的Fragment
+ * 。因此经常在Activity的onCreate 函数中判处savedInstanceState 是否为空，（当Activity
+ * 有关联的Fragment时，重建Activity时savedInstanceState不为空）来避免重复创建Fragment。
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-13 上午10:44:54
  */
 public class FragmentRetainInstance extends Activity {
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        
-        // First time init, create the UI.
-        if (savedInstanceState == null) {
-            getFragmentManager().beginTransaction().add(android.R.id.content,
-                    new UiFragment()).commit();
-        }
-    }
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		// 初始化添加Fragmnet
+		if (savedInstanceState == null) {
+			getFragmentManager().beginTransaction()
+					.add(android.R.id.content, new UiFragment()).commit();
+		}
+	}
 
-    /**
-     * This is a fragment showing UI that will be updated from work done
-     * in the retained fragment.
-     */
-    public static class UiFragment extends Fragment {
-        RetainedFragment mWorkFragment;
+	/**
+	 * This is a fragment showing UI that will be updated from work done in the
+	 * retained fragment.
+	 */
+	public static class UiFragment extends Fragment {
+		RetainedFragment mWorkFragment;
 
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View v = inflater.inflate(R.layout.fragment_retain_instance, container, false);
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container,
+				Bundle savedInstanceState) {
+			View v = inflater.inflate(R.layout.fragment_retain_instance,
+					container, false);
 
-            // Watch for button clicks.
-            Button button = (Button)v.findViewById(R.id.restart);
-            button.setOnClickListener(new OnClickListener() {
-                public void onClick(View v) {
-                    mWorkFragment.restart();
-                }
-            });
+			// Watch for button clicks.
+			Button button = (Button) v.findViewById(R.id.restart);
+			button.setOnClickListener(new OnClickListener() {
+				public void onClick(View v) {
+					mWorkFragment.restart();
+				}
+			});
 
-            return v;
-        }
+			return v;
+		}
 
-        @Override
-        public void onActivityCreated(Bundle savedInstanceState) {
-            super.onActivityCreated(savedInstanceState);
+		@Override
+		public void onActivityCreated(Bundle savedInstanceState) {
+			super.onActivityCreated(savedInstanceState);
 
-            FragmentManager fm = getFragmentManager();
+			FragmentManager fm = getFragmentManager();
+			mWorkFragment = (RetainedFragment) fm.findFragmentByTag("work");
+			if (mWorkFragment == null) {
+				mWorkFragment = new RetainedFragment();
+				mWorkFragment.setTargetFragment(this, 0);
+				fm.beginTransaction().add(mWorkFragment, "work").commit();
+			}
+		}
 
-            // Check to see if we have retained the worker fragment.
-            mWorkFragment = (RetainedFragment)fm.findFragmentByTag("work");
+	}
 
-            // If not retained (or first time running), we need to create it.
-            if (mWorkFragment == null) {
-                mWorkFragment = new RetainedFragment();
-                // Tell it who it is working with.
-                mWorkFragment.setTargetFragment(this, 0);
-                fm.beginTransaction().add(mWorkFragment, "work").commit();
-            }
-        }
+	public static class RetainedFragment extends Fragment {
+		ProgressBar mProgressBar;
+		int mPosition;
+		boolean mReady = false;
+		boolean mQuiting = false;
 
-    }
+		/**
+		 * 线程模拟数据让进度条显示进度
+		 */
+		final Thread mThread = new Thread() {
+			@Override
+			public void run() {
+				// 设备进度条最大值
+				int max = 10000;
 
-    /**
-     * This is the Fragment implementation that will be retained across
-     * activity instances.  It represents some ongoing work, here a thread
-     * we have that sits around incrementing a progress indicator.
-     */
-    public static class RetainedFragment extends Fragment {
-        ProgressBar mProgressBar;
-        int mPosition;
-        boolean mReady = false;
-        boolean mQuiting = false;
+				// 死循环，一直在进行
+				while (true) {
 
-        /**
-         * This is the thread that will do our work.  It sits in a loop running
-         * the progress up until it has reached the top, then stops and waits.
-         */
-        final Thread mThread = new Thread() {
-            @Override
-            public void run() {
-                // We'll figure the real value out later.
-                int max = 10000;
+					synchronized (this) {
+						// 如果UI没准备好或进度已达最大值
+						while (!mReady || mPosition >= max) {
+							if (mQuiting) {
+								return;
+							}
+							try {
+								wait();
+							} catch (InterruptedException e) {
+							}
+						}
 
-                // This thread runs almost forever.
-                while (true) {
+						// 更新进度
+						mPosition++;
+						max = mProgressBar.getMax();
+						mProgressBar.setProgress(mPosition);
+					}
+					// 设置等待时间
+					synchronized (this) {
+						try {
+							wait(50);
+						} catch (InterruptedException e) {
+						}
+					}
+				}
+			}
+		};
 
-                    // Update our shared state with the UI.
-                    synchronized (this) {
-                        // Our thread is stopped if the UI is not ready
-                        // or it has completed its work.
-                        while (!mReady || mPosition >= max) {
-                            if (mQuiting) {
-                                return;
-                            }
-                            try {
-                                wait();
-                            } catch (InterruptedException e) {
-                            }
-                        }
+		@Override
+		public void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
 
-                        // Now update the progress.  Note it is important that
-                        // we touch the progress bar with the lock held, so it
-                        // doesn't disappear on us.
-                        mPosition++;
-                        max = mProgressBar.getMax();
-                        mProgressBar.setProgress(mPosition);
-                    }
+			// 确定是否让fragment保存状态。注意设置保存状态之后fragment的生命周期会有些变化。
+			setRetainInstance(true);
 
-                    // Normally we would be doing some work, but put a kludge
-                    // here to pretend like we are.
-                    synchronized (this) {
-                        try {
-                            wait(50);
-                        } catch (InterruptedException e) {
-                        }
-                    }
-                }
-            }
-        };
+			// 启动线程
+			mThread.start();
+		}
 
-        /**
-         * Fragment initialization.  We way we want to be retained and
-         * start our thread.
-         */
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            
-            // Tell the framework to try to keep this fragment around
-            // during a configuration change.
-            setRetainInstance(true);
-            
-            // Start up the worker thread.
-            mThread.start();
-        }
+		@Override
+		public void onActivityCreated(Bundle savedInstanceState) {
+			super.onActivityCreated(savedInstanceState);
 
-        /**
-         * This is called when the Fragment's Activity is ready to go, after
-         * its content view has been installed; it is called both after
-         * the initial fragment creation and after the fragment is re-attached
-         * to a new activity.
-         */
-        @Override
-        public void onActivityCreated(Bundle savedInstanceState) {
-            super.onActivityCreated(savedInstanceState);
-            
-            // Retrieve the progress bar from the target's view hierarchy.
-            mProgressBar = (ProgressBar)getTargetFragment().getView().findViewById(
-                    R.id.progress_horizontal);
-            
-            // We are ready for our thread to go.
-            synchronized (mThread) {
-                mReady = true;
-                mThread.notify();
-            }
-        }
+			// 初始化ProgressBar
+			mProgressBar = (ProgressBar) getTargetFragment().getView()
+					.findViewById(R.id.progress_horizontal);
+			synchronized (mThread) {
+				mReady = true;
+				mThread.notify();
+			}
+		}
 
-        /**
-         * This is called when the fragment is going away.  It is NOT called
-         * when the fragment is being propagated between activity instances.
-         */
-        @Override
-        public void onDestroy() {
-            // Make the thread go away.
-            synchronized (mThread) {
-                mReady = false;
-                mQuiting = true;
-                mThread.notify();
-            }
-            
-            super.onDestroy();
-        }
+		@Override
+		public void onDestroy() {
+			// 线程结束
+			synchronized (mThread) {
+				mReady = false;
+				mQuiting = true;
+				mThread.notify();
+			}
 
-        /**
-         * This is called right before the fragment is detached from its
-         * current activity instance.
-         */
-        @Override
-        public void onDetach() {
-            // This fragment is being detached from its activity.  We need
-            // to make sure its thread is not going to touch any activity
-            // state after returning from this function.
-            synchronized (mThread) {
-                mProgressBar = null;
-                mReady = false;
-                mThread.notify();
-            }
-            
-            super.onDetach();
-        }
+			super.onDestroy();
+		}
 
-        /**
-         * API for our UI to restart the progress thread.
-         */
-        public void restart() {
-            synchronized (mThread) {
-                mPosition = 0;
-                mThread.notify();
-            }
-        }
-    }
+		// Fragment与Activity分离
+		@Override
+		public void onDetach() {
+			synchronized (mThread) {
+				mProgressBar = null;
+				mReady = false;
+				mThread.notify();
+			}
+
+			super.onDetach();
+		}
+
+		/**
+		 * 重新开始进度
+		 * 
+		 * @description：
+		 * @author ldm
+		 * @date 2016-5-13 上午11:01:06
+		 */
+		public void restart() {
+			synchronized (mThread) {
+				mPosition = 0;
+				mThread.notify();
+			}
+		}
+	}
 }

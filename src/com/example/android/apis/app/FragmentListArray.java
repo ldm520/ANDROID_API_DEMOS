@@ -27,34 +27,49 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 /**
- * Demonstration of using ListFragment to show a list of items
- * from a canned array.
+ * ListFragment使用
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-12 下午5:39:25
  */
 public class FragmentListArray extends Activity {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
-        // Create the list fragment and add it as our sole content.
-        if (getFragmentManager().findFragmentById(android.R.id.content) == null) {
-            ArrayListFragment list = new ArrayListFragment();
-            getFragmentManager().beginTransaction().add(android.R.id.content, list).commit();
-        }
-    }
+		// 判断当前Fragment是否存在
+		if (getFragmentManager().findFragmentById(android.R.id.content) == null) {
+			// 初始化ArrayListFragment
+			ArrayListFragment list = new ArrayListFragment();
+			// 添加Fragment到Activity中
+			getFragmentManager().beginTransaction()
+					.add(android.R.id.content, list).commit();
+		}
+	}
 
-    public static class ArrayListFragment extends ListFragment {
+	/**
+	 * 定义ListFragment的子类ArrayListFragment
+	 * 
+	 * @description：
+	 * @author ldm
+	 * @date 2016-5-13 上午10:12:56
+	 */
+	public static class ArrayListFragment extends ListFragment {
 
-        @Override
-        public void onActivityCreated(Bundle savedInstanceState) {
-            super.onActivityCreated(savedInstanceState);
-            setListAdapter(new ArrayAdapter<String>(getActivity(),
-                    android.R.layout.simple_list_item_1, Shakespeare.TITLES));
-        }
+		@Override
+		public void onActivityCreated(Bundle savedInstanceState) {
+			super.onActivityCreated(savedInstanceState);
+			// 设置数据
+			setListAdapter(new ArrayAdapter<String>(getActivity(),
+					android.R.layout.simple_list_item_1, Shakespeare.TITLES));
+		}
 
-        @Override
-        public void onListItemClick(ListView l, View v, int position, long id) {
-            Log.i("FragmentList", "Item clicked: " + id);
-        }
-    }
+		// ListView的item点击事件
+		@Override
+		public void onListItemClick(ListView l, View v, int position, long id) {
+			Log.i("FragmentList", "Item clicked: " + id);
+		}
+	}
 }

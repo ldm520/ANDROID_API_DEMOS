@@ -18,8 +18,11 @@ package com.example.android.apis.app;
 
 import com.example.android.apis.R;
 
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,63 +30,69 @@ import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
+/**
+ * 嵌套Fragment栈管理
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-13 上午11:12:41
+ */
+@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 public class FragmentStackFragment extends Fragment {
-    int mStackLevel = 1;
+	int mStackLevel = 1;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
-        if (savedInstanceState == null) {
-            // Do first time initialization -- add initial fragment.
-            Fragment newFragment = FragmentStack.CountingFragment.newInstance(mStackLevel);
-            FragmentTransaction ft = getChildFragmentManager().beginTransaction();
-            ft.add(R.id.simple_fragment, newFragment).commit();
-        } else {
-            mStackLevel = savedInstanceState.getInt("level");
-        }
-    }
+		if (savedInstanceState == null) {
+			Fragment newFragment = FragmentStack.CountingFragment
+					.newInstance(mStackLevel);
+			FragmentTransaction ft = getChildFragmentManager()
+					.beginTransaction();
+			ft.add(R.id.simple_fragment, newFragment).commit();
+		} else {
+			mStackLevel = savedInstanceState.getInt("level");
+		}
+	}
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_stack, container, false);
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		View v = inflater.inflate(R.layout.fragment_stack, container, false);
 
-        // Watch for button clicks.
-        Button button = (Button)v.findViewById(R.id.new_fragment);
-        button.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                addFragmentToStack();
-            }
-        });
-        button = (Button)v.findViewById(R.id.delete_fragment);
-        button.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                getChildFragmentManager().popBackStack();
-            }
-        });
+		Button button = (Button) v.findViewById(R.id.new_fragment);
+		button.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				addFragmentToStack();
+			}
+		});
+		button = (Button) v.findViewById(R.id.delete_fragment);
+		button.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				getChildFragmentManager().popBackStack();
+			}
+		});
 
-        return v;
-    }
+		return v;
+	}
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt("level", mStackLevel);
-    }
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putInt("level", mStackLevel);
+	}
 
-    void addFragmentToStack() {
-        mStackLevel++;
+	@SuppressLint("NewApi")
+	void addFragmentToStack() {
+		mStackLevel++;
 
-        // Instantiate a new fragment.
-        Fragment newFragment = FragmentStack.CountingFragment.newInstance(mStackLevel);
-
-        // Add the fragment to the activity, pushing this transaction
-        // on to the back stack.
-        FragmentTransaction ft = getChildFragmentManager().beginTransaction();
-        ft.replace(R.id.simple_fragment, newFragment);
-        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-        ft.addToBackStack(null);
-        ft.commit();
-    }
+		Fragment newFragment = FragmentStack.CountingFragment
+				.newInstance(mStackLevel);
+		FragmentTransaction ft = getChildFragmentManager().beginTransaction();
+		ft.replace(R.id.simple_fragment, newFragment);
+		ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+		ft.addToBackStack(null);
+		ft.commit();
+	}
 }

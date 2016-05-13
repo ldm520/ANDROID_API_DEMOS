@@ -23,44 +23,17 @@ import com.example.android.apis.R;
 import android.app.Activity;
 import android.os.Bundle;
 
-
 /**
- * Simple example of writing an application Activity.
- * Hello World</a></h3>
-
-<p>This demonstrates the basic code needed to write a Screen activity.</p>
-
-<h4>Demo</h4>
-App/Activity/Hello World
- 
-<h4>Source files</h4>
- * <table class="LinkTable">
- *         <tr>
- *             <td >src/com.example.android.apis/app/HelloWorld.java</td>
- *             <td >The Hello World Screen implementation</td>
- *         </tr>
- *         <tr>
- *             <td >/res/any/layout/hello_world.xml</td>
- *             <td >Defines contents of the screen</td>
- *         </tr>
- * </table> 
+ * Android开发第一个程序 HelloWorld
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-13 上午11:25:40
  */
-public class HelloWorld extends Activity
-{
-    /**
-     * Initialization of the Activity after it is first created.  Must at least
-     * call {@link android.app.Activity#setContentView setContentView()} to
-     * describe what is to be displayed in the screen.
-     */
-    @Override
-	protected void onCreate(Bundle savedInstanceState)
-    {
-        // Be sure to call the super class.
-        super.onCreate(savedInstanceState);
-
-        // See assets/res/any/layout/hello_world.xml for this
-        // view layout definition, which is being set here as
-        // the content of our screen.
-        setContentView(R.layout.hello_world);
-    }
+public class HelloWorld extends Activity {
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.hello_world);
+	}
 }

@@ -16,8 +16,6 @@
 
 package com.example.android.apis.app;
 
-import com.example.android.apis.R;
-
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -30,103 +28,121 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.CheckBox;
 
+import com.example.android.apis.R;
+
 /**
- * Demonstrates how fragments can participate in the options menu.
+ * Fragment中实现选择菜单功能
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-13 上午10:14:28
  */
 public class FragmentMenu extends Activity {
-    Fragment mFragment1;
-    Fragment mFragment2;
-    CheckBox mCheckBox1;
-    CheckBox mCheckBox2;
+	Fragment mFragment1;
+	Fragment mFragment2;
+	CheckBox mCheckBox1;
+	CheckBox mCheckBox2;
 
-    // Update fragment visibility when check boxes are changed.
-    final OnClickListener mClickListener = new OnClickListener() {
-        public void onClick(View v) {
-            updateFragmentVisibility();
-        }
-    };
+	// 根据 CheckBox是否选中来显示对应Fragment
+	private OnClickListener mClickListener = new OnClickListener() {
+		public void onClick(View v) {
+			updateFragmentVisibility();
+		}
+	};
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_menu);
-        
-        // Make sure the two menu fragments are created.
-        FragmentManager fm = getFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
-        mFragment1 = fm.findFragmentByTag("f1");
-        if (mFragment1 == null) {
-            mFragment1 = new MenuFragment();
-            ft.add(mFragment1, "f1");
-        }
-        mFragment2 = fm.findFragmentByTag("f2");
-        if (mFragment2 == null) {
-            mFragment2 = new Menu2Fragment();
-            ft.add(mFragment2, "f2");
-        }
-        ft.commit();
-        
-        // Watch check box clicks.
-        mCheckBox1 = (CheckBox)findViewById(R.id.menu1);
-        mCheckBox1.setOnClickListener(mClickListener);
-        mCheckBox2 = (CheckBox)findViewById(R.id.menu2);
-        mCheckBox2.setOnClickListener(mClickListener);
-        
-        // Make sure fragments start out with correct visibility.
-        updateFragmentVisibility();
-    }
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.fragment_menu);
+		// 初始化FragmentManager
+		FragmentManager fm = getFragmentManager();
+		// 开启事务
+		FragmentTransaction ft = fm.beginTransaction();
+		mFragment1 = fm.findFragmentByTag("f1");
+		// 添加Fragment
+		if (mFragment1 == null) {
+			mFragment1 = new MenuFragment();
+			ft.add(mFragment1, "f1");
+		}
+		mFragment2 = fm.findFragmentByTag("f2");
+		if (mFragment2 == null) {
+			mFragment2 = new Menu2Fragment();
+			ft.add(mFragment2, "f2");
+		}
+		ft.commit();
 
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        // Make sure fragments are updated after check box view state is restored.
-        updateFragmentVisibility();
-    }
+		// 初始化CheckBox及监听事件
+		mCheckBox1 = (CheckBox) findViewById(R.id.menu1);
+		mCheckBox1.setOnClickListener(mClickListener);
+		mCheckBox2 = (CheckBox) findViewById(R.id.menu2);
+		mCheckBox2.setOnClickListener(mClickListener);
+		updateFragmentVisibility();
+	}
 
-    // Update fragment visibility based on current check box state.
-    void updateFragmentVisibility() {
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        if (mCheckBox1.isChecked()) ft.show(mFragment1);
-        else ft.hide(mFragment1);
-        if (mCheckBox2.isChecked()) ft.show(mFragment2);
-        else ft.hide(mFragment2);
-        ft.commit();
-    }
+	// 告知fragment所有的view布局状态已经被存储
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		super.onRestoreInstanceState(savedInstanceState);
+		updateFragmentVisibility();
+	}
 
-    /**
-     * A fragment that displays a menu.  This fragment happens to not
-     * have a UI (it does not implement onCreateView), but it could also
-     * have one if it wanted.
-     */
-    public static class MenuFragment extends Fragment {
+	// 根据CheckBox状态来切换Fragment
+	void updateFragmentVisibility() {
+		FragmentTransaction ft = getFragmentManager().beginTransaction();
+		if (mCheckBox1.isChecked())
+			ft.show(mFragment1);
+		else
+			ft.hide(mFragment1);
+		if (mCheckBox2.isChecked())
+			ft.show(mFragment2);
+		else
+			ft.hide(mFragment2);
+		ft.commit();
+	}
 
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            setHasOptionsMenu(true);
-        }
+	/**
+	 * 菜单功能MenuFragment
+	 * 
+	 * @description：
+	 * @author ldm
+	 * @date 2016-5-13 上午10:18:40
+	 */
+	public static class MenuFragment extends Fragment {
 
-        @Override
-        public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-            menu.add("Menu 1a").setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-            menu.add("Menu 1b").setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-        }
-    }
+		@Override
+		public void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
+			setHasOptionsMenu(true);
+		}
 
-    /**
-     * Second fragment with a menu.
-     */
-    public static class Menu2Fragment extends Fragment {
+		// 创建菜单项目
+		@Override
+		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+			menu.add("Menu 1a")
+					.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+			menu.add("Menu 1b")
+					.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+		}
+	}
 
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            setHasOptionsMenu(true);
-        }
+	/**
+	 * 菜单功能Menu2Fragment
+	 * 
+	 * @description：
+	 * @author ldm
+	 * @date 2016-5-13 上午10:18:40
+	 */
+	public static class Menu2Fragment extends Fragment {
 
-        @Override
-        public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-            menu.add("Menu 2").setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-        }
-    }
+		@Override
+		public void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
+			setHasOptionsMenu(true);
+		}
+
+		@Override
+		public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+			menu.add("Menu 2").setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+		}
+	}
 }

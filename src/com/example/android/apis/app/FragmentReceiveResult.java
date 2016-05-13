@@ -32,102 +32,98 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+/**
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-13 上午10:34:22
+ */
 public class FragmentReceiveResult extends Activity {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT);
-        FrameLayout frame = new FrameLayout(this);
-        frame.setId(R.id.simple_fragment);
-        setContentView(frame, lp);
-        
-        if (savedInstanceState == null) {
-            // Do first time initialization -- add fragment. 
-            Fragment newFragment = new ReceiveResultFragment();
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
-            ft.add(R.id.simple_fragment, newFragment).commit();
-        }
-    }
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
-    public static class ReceiveResultFragment extends Fragment {
-        // Definition of the one requestCode we use for receiving resuls.
-        static final private int GET_CODE = 0;
+		// 代码动态初始化FrameLayout
+		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+				ViewGroup.LayoutParams.MATCH_PARENT,
+				ViewGroup.LayoutParams.MATCH_PARENT);
+		FrameLayout frame = new FrameLayout(this);
+		frame.setId(R.id.simple_fragment);
+		// 设置布局文件到Activity
+		setContentView(frame, lp);
 
-        private TextView mResults;
+		if (savedInstanceState == null) {
+			// 添加Fragment
+			Fragment newFragment = new ReceiveResultFragment();
+			FragmentTransaction ft = getFragmentManager().beginTransaction();
+			ft.add(R.id.simple_fragment, newFragment).commit();
+		}
+	}
 
-        private OnClickListener mGetListener = new OnClickListener() {
-            public void onClick(View v) {
-                // Start the activity whose result we want to retrieve.  The
-                // result will come back with request code GET_CODE.
-                Intent intent = new Intent(getActivity(), SendResult.class);
-                startActivityForResult(intent, GET_CODE);
-            }
-        };
+	public static class ReceiveResultFragment extends Fragment {
+		// 定义请求码
+		static final private int GET_CODE = 0;
+		// 展示结果的TextView
+		private TextView mResults;
 
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-        }
+		private OnClickListener mGetListener = new OnClickListener() {
+			public void onClick(View v) {
+				// startActivityForResult跳转
+				Intent intent = new Intent(getActivity(), SendResult.class);
+				startActivityForResult(intent, GET_CODE);
+			}
+		};
 
-        @Override
-        public void onSaveInstanceState(Bundle outState) {
-            super.onSaveInstanceState(outState);
-        }
+		@Override
+		public void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
+		}
 
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View v = inflater.inflate(R.layout.receive_result, container, false);
-            
-            // Retrieve the TextView widget that will display results.
-            mResults = (TextView)v.findViewById(R.id.results);
+		@Override
+		public void onSaveInstanceState(Bundle outState) {
+			super.onSaveInstanceState(outState);
+		}
 
-            // This allows us to later extend the text buffer.
-            mResults.setText(mResults.getText(), TextView.BufferType.EDITABLE);
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container,
+				Bundle savedInstanceState) {
+			View v = inflater
+					.inflate(R.layout.receive_result, container, false);
 
-            // Watch for button clicks.
-            Button getButton = (Button)v.findViewById(R.id.get);
-            getButton.setOnClickListener(mGetListener);
-            
-            return v;
-        }
+			mResults = (TextView) v.findViewById(R.id.results);
+			mResults.setText(mResults.getText(), TextView.BufferType.EDITABLE);
+			Button getButton = (Button) v.findViewById(R.id.get);
+			getButton.setOnClickListener(mGetListener);
 
-        /**
-         * This method is called when the sending activity has finished, with the
-         * result it supplied.
-         */
-        @Override
-        public void onActivityResult(int requestCode, int resultCode, Intent data) {
-            // You can use the requestCode to select between multiple child
-            // activities you may have started.  Here there is only one thing
-            // we launch.
-            if (requestCode == GET_CODE) {
+			return v;
+		}
 
-                // We will be adding to our text.
-                Editable text = (Editable)mResults.getText();
+		/**
+		 * 在Fragment中OnActivityResult方法中接收Activity中返回的值
+		 * 
+		 */
+		@Override
+		public void onActivityResult(int requestCode, int resultCode,
+				Intent data) {
+			// 在onActivityResult方法中接收返回数据
+			if (requestCode == GET_CODE) {
 
-                // This is a standard resultCode that is sent back if the
-                // activity doesn't supply an explicit result.  It will also
-                // be returned if the activity failed to launch.
-                if (resultCode == RESULT_CANCELED) {
-                    text.append("(cancelled)");
+				Editable text = (Editable) mResults.getText();
+				if (resultCode == RESULT_CANCELED) {
+					text.append("(cancelled)");
 
-                // Our protocol with the sending activity is that it will send
-                // text in 'data' as its result.
-                } else {
-                    text.append("(okay ");
-                    text.append(Integer.toString(resultCode));
-                    text.append(") ");
-                    if (data != null) {
-                        text.append(data.getAction());
-                    }
-                }
+				} else {
+					text.append("(okay ");
+					text.append(Integer.toString(resultCode));
+					text.append(") ");
+					if (data != null) {
+						text.append(data.getAction());
+					}
+				}
 
-                text.append("\n");
-            }
-        }
-    }
+				text.append("\n");
+			}
+		}
+	}
 }
