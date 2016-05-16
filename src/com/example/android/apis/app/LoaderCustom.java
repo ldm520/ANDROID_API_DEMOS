@@ -59,26 +59,25 @@ import android.widget.TextView;
 import com.example.android.apis.R;
 
 /**
- * Demonstration of the implementation of a custom Loader.
+ * 自定义Loader 
+ * 很多方法及代码注释可以参考：http://blog.csdn.net/true100/article/details/51321390
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-16 上午10:55:28
  */
 public class LoaderCustom extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
 		FragmentManager fm = getFragmentManager();
-
-		// Create the list fragment and add it as our sole content.
 		if (fm.findFragmentById(android.R.id.content) == null) {
 			AppListFragment list = new AppListFragment();
 			fm.beginTransaction().add(android.R.id.content, list).commit();
 		}
 	}
 
-	/**
-	 * This class holds the per-item data in our Loader.
-	 */
 	public static class AppEntry {
 		public AppEntry(AppListLoader loader, ApplicationInfo info) {
 			mLoader = loader;
@@ -209,7 +208,12 @@ public class LoaderCustom extends Activity {
 	}
 
 	/**
-	 * A custom Loader that loads all of the installed applications.
+	 * 自定义Loader加载手机中已经安装 的所有应用
+	 * AsyncTaskLoader：异步（通俗理解就是又开了一个线程而已），并且当他检测到数据的变化时会自动加载。
+	 * 
+	 * @description：
+	 * @author ldm
+	 * @date 2016-5-16 上午11:08:40
 	 */
 	public static class AppListLoader extends AsyncTaskLoader<List<AppEntry>> {
 		final InterestingConfigChanges mLastConfig = new InterestingConfigChanges();
@@ -220,21 +224,14 @@ public class LoaderCustom extends Activity {
 
 		public AppListLoader(Context context) {
 			super(context);
-
-			// Retrieve the package manager for later use; note we don't
-			// use 'context' directly but instead the save global application
-			// context returned by getContext().
 			mPm = getContext().getPackageManager();
 		}
 
 		/**
-		 * This is where the bulk of our work is done. This function is called
-		 * in a background thread and should generate a new set of data to be
-		 * published by the loader.
+		 * 后台执行的耗时操作，加载APP数据
 		 */
 		@Override
 		public List<AppEntry> loadInBackground() {
-			// Retrieve all known applications.
 			List<ApplicationInfo> apps = mPm
 					.getInstalledApplications(PackageManager.GET_UNINSTALLED_PACKAGES
 							| PackageManager.GET_DISABLED_COMPONENTS);
@@ -243,32 +240,20 @@ public class LoaderCustom extends Activity {
 			}
 
 			final Context context = getContext();
-
-			// Create corresponding array of entries and load their labels.
 			List<AppEntry> entries = new ArrayList<AppEntry>(apps.size());
 			for (int i = 0; i < apps.size(); i++) {
 				AppEntry entry = new AppEntry(this, apps.get(i));
 				entry.loadLabel(context);
 				entries.add(entry);
 			}
-
-			// Sort the list.
 			Collections.sort(entries, ALPHA_COMPARATOR);
 
-			// Done!
 			return entries;
 		}
 
-		/**
-		 * Called when there is new data to deliver to the client. The super
-		 * class will take care of delivering it; the implementation here just
-		 * adds a little more logic.
-		 */
 		@Override
 		public void deliverResult(List<AppEntry> apps) {
 			if (isReset()) {
-				// An async query came in while the loader is stopped. We
-				// don't need the result.
 				if (apps != null) {
 					onReleaseResources(apps);
 				}
@@ -277,65 +262,40 @@ public class LoaderCustom extends Activity {
 			mApps = apps;
 
 			if (isStarted()) {
-				// If the Loader is currently started, we can immediately
-				// deliver its results.
 				super.deliverResult(apps);
 			}
 
-			// At this point we can release the resources associated with
-			// 'oldApps' if needed; now that the new result is delivered we
-			// know that it is no longer in use.
 			if (oldApps != null) {
 				onReleaseResources(oldApps);
 			}
 		}
 
-		/**
-		 * Handles a request to start the Loader.
-		 */
 		@Override
 		protected void onStartLoading() {
 			if (mApps != null) {
-				// If we currently have a result available, deliver it
-				// immediately.
 				deliverResult(mApps);
 			}
 
-			// Start watching for changes in the app data.
 			if (mPackageObserver == null) {
 				mPackageObserver = new PackageIntentReceiver(this);
 			}
 
-			// Has something interesting in the configuration changed since we
-			// last built the app list?
 			boolean configChange = mLastConfig.applyNewConfig(getContext()
 					.getResources());
 
 			if (takeContentChanged() || mApps == null || configChange) {
-				// If the data has changed since the last time it was loaded
-				// or is not currently available, start a load.
 				forceLoad();
 			}
 		}
 
-		/**
-		 * Handles a request to stop the Loader.
-		 */
 		@Override
 		protected void onStopLoading() {
-			// Attempt to cancel the current load task if possible.
 			cancelLoad();
 		}
 
-		/**
-		 * Handles a request to cancel a load.
-		 */
 		@Override
 		public void onCanceled(List<AppEntry> apps) {
 			super.onCanceled(apps);
-
-			// At this point we can release the resources associated with 'apps'
-			// if needed.
 			onReleaseResources(apps);
 		}
 
@@ -345,31 +305,20 @@ public class LoaderCustom extends Activity {
 		@Override
 		protected void onReset() {
 			super.onReset();
-
-			// Ensure the loader is stopped
 			onStopLoading();
 
-			// At this point we can release the resources associated with 'apps'
-			// if needed.
 			if (mApps != null) {
 				onReleaseResources(mApps);
 				mApps = null;
 			}
 
-			// Stop monitoring for changes.
 			if (mPackageObserver != null) {
 				getContext().unregisterReceiver(mPackageObserver);
 				mPackageObserver = null;
 			}
 		}
 
-		/**
-		 * Helper function to take care of releasing resources associated with
-		 * an actively loaded data set.
-		 */
 		protected void onReleaseResources(List<AppEntry> apps) {
-			// For a simple List<> there is nothing to do. For something
-			// like a Cursor, we would close it here.
 		}
 	}
 
@@ -389,9 +338,6 @@ public class LoaderCustom extends Activity {
 			}
 		}
 
-		/**
-		 * Populate new items in the list.
-		 */
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			View view;
@@ -416,35 +362,24 @@ public class LoaderCustom extends Activity {
 			OnQueryTextListener, OnCloseListener,
 			LoaderManager.LoaderCallbacks<List<AppEntry>> {
 
-		// This is the Adapter being used to display the list's data.
 		AppListAdapter mAdapter;
 
-		// The SearchView for doing filtering.
 		SearchView mSearchView;
 
-		// If non-null, this is the current filter the user has provided.
 		String mCurFilter;
 
 		@Override
 		public void onActivityCreated(Bundle savedInstanceState) {
 			super.onActivityCreated(savedInstanceState);
 
-			// Give some text to display if there is no data. In a real
-			// application this would come from a resource.
 			setEmptyText("No applications");
 
-			// We have a menu item to show in action bar.
 			setHasOptionsMenu(true);
 
-			// Create an empty adapter we will use to display the loaded data.
 			mAdapter = new AppListAdapter(getActivity());
 			setListAdapter(mAdapter);
-
-			// Start out with a progress indicator.
 			setListShown(false);
 
-			// Prepare the loader. Either re-connect with an existing one,
-			// or start a new one.
 			getLoaderManager().initLoader(0, null, this);
 		}
 
@@ -453,8 +388,6 @@ public class LoaderCustom extends Activity {
 				super(context);
 			}
 
-			// The normal SearchView doesn't clear its search text when
-			// collapsed, so we will do this for it.
 			@Override
 			public void onActionViewCollapsed() {
 				setQuery("", false);
@@ -478,8 +411,6 @@ public class LoaderCustom extends Activity {
 
 		@Override
 		public boolean onQueryTextChange(String newText) {
-			// Called when the action bar search text has changed. Since this
-			// is a simple array adapter, we can just have it do the filtering.
 			mCurFilter = !TextUtils.isEmpty(newText) ? newText : null;
 			mAdapter.getFilter().filter(mCurFilter);
 			return true;
@@ -487,7 +418,6 @@ public class LoaderCustom extends Activity {
 
 		@Override
 		public boolean onQueryTextSubmit(String query) {
-			// Don't care about this.
 			return true;
 		}
 
@@ -501,24 +431,19 @@ public class LoaderCustom extends Activity {
 
 		@Override
 		public void onListItemClick(ListView l, View v, int position, long id) {
-			// Insert desired behavior here.
 			Log.i("LoaderCustom", "Item clicked: " + id);
 		}
 
 		@Override
 		public Loader<List<AppEntry>> onCreateLoader(int id, Bundle args) {
-			// This is called when a new Loader needs to be created. This
-			// sample only has one Loader with no arguments, so it is simple.
 			return new AppListLoader(getActivity());
 		}
 
 		@Override
 		public void onLoadFinished(Loader<List<AppEntry>> loader,
 				List<AppEntry> data) {
-			// Set the new data in the adapter.
 			mAdapter.setData(data);
 
-			// The list should now be shown.
 			if (isResumed()) {
 				setListShown(true);
 			} else {
@@ -528,7 +453,6 @@ public class LoaderCustom extends Activity {
 
 		@Override
 		public void onLoaderReset(Loader<List<AppEntry>> loader) {
-			// Clear the data in the adapter.
 			mAdapter.setData(null);
 		}
 	}

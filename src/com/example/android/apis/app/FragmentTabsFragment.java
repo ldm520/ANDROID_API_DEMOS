@@ -64,7 +64,7 @@ import android.widget.TabHost;
 				LoaderCustom.AppListFragment.class, null);
 		mTabManager.addTab(
 				host.newTabSpec("throttle").setIndicator("Throttle"),
-				LoaderThrottle.ThrottledLoaderListFragment.class, null);
+				LoaderThrottle.LoaderThrottleFragment.class, null);
 
 		return v;
 	}

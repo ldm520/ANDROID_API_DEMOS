@@ -64,10 +64,10 @@ public class FragmentTabs extends Activity {
 				.newTab()
 				.setText("Throttle")
 				.setTabListener(
-						new TabListener<LoaderThrottle.ThrottledLoaderListFragment>(
+						new TabListener<LoaderThrottle.LoaderThrottleFragment>(
 								this,
 								"throttle",
-								LoaderThrottle.ThrottledLoaderListFragment.class)));
+								LoaderThrottle.LoaderThrottleFragment.class)));
 
 		if (savedInstanceState != null) {
 			bar.setSelectedNavigationItem(savedInstanceState.getInt("tab", 0));

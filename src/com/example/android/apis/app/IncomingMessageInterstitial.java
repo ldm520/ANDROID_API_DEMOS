@@ -26,39 +26,41 @@ import android.view.View;
 import android.widget.Button;
 
 /**
- * This is an activity that provides an interstitial UI for the notification
- * that is posted by {@link NotificationsActivity}.  It allows the user to switch
- * to the app in its appropriate state if they want.
+ * 这是一个为通知提供了用户界面的Activity
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-13 上午11:53:00
  */
 public class IncomingMessageInterstitial extends Activity {
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.incoming_message_interstitial);
+		Button button = (Button) findViewById(R.id.notify_app);
+		button.setOnClickListener(new Button.OnClickListener() {
+			public void onClick(View v) {
+				switchToApp();
+			}
+		});
+	}
 
-        setContentView(R.layout.incoming_message_interstitial);
-
-        Button button = (Button) findViewById(R.id.notify_app);
-        button.setOnClickListener(new Button.OnClickListener() {
-                public void onClick(View v) {
-                    switchToApp();
-                }
-            });
-    }
-
-
-    /**
-     * Perform a switch to the app.  A new activity stack is started, replacing
-     * whatever is currently running, and this activity is finished.
-     */
-    void switchToApp() {
-        // We will launch the app showing what the user picked.  In this simple
-        // example, it is just what the notification gave us.
-        CharSequence from = getIntent().getCharSequenceExtra(IncomingMessageView.KEY_FROM);
-        CharSequence msg = getIntent().getCharSequenceExtra(IncomingMessageView.KEY_MESSAGE);
-        // Build the new activity stack, launch it, and finish this UI.
-        Intent[] stack = NotificationsActivity.makeMessageIntentStack(this, from, msg);
-        startActivities(stack);
-        finish();
-    }
+	/**
+	 * 点击跳转
+	 * 
+	 * @description：
+	 * @author ldm
+	 * @date 2016-5-13 上午11:56:17
+	 */
+	void switchToApp() {
+		CharSequence from = getIntent().getCharSequenceExtra(
+				IncomingMessageView.KEY_FROM);
+		CharSequence msg = getIntent().getCharSequenceExtra(
+				IncomingMessageView.KEY_MESSAGE);
+		Intent[] stack = NotificationsActivity.makeMessageIntentStack(this,
+				from, msg);
+		startActivities(stack);
+		finish();
+	}
 
 }

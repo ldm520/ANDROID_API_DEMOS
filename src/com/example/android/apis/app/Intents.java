@@ -25,29 +25,53 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
+/**
+ * Android常用Intent API
+ * http://blog.csdn.net/wl455624651/article/details/7943252这个博客更详细
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-13 下午2:23:37
+ */
 public class Intents extends Activity {
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.intents);
+	}
 
-        setContentView(R.layout.intents);
-    }
+	/**
+	 * 打开多媒体
+	 * 
+	 * @description：
+	 * @author ldm
+	 * @date 2016-5-13 下午2:24:18
+	 */
+	public void onGetMusic(View view) {
+		Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+		intent.setType("audio/*");
+		startActivity(Intent.createChooser(intent, "Select music"));
+	}
 
-    public void onGetMusic(View view) {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("audio/*");
-        startActivity(Intent.createChooser(intent, "Select music"));
-    }
+	/**
+	 * 打开图库
+	 * 
+	 * @description：
+	 * @author ldm
+	 * @date 2016-5-13 下午2:26:49
+	 */
+	public void onGetImage(View view) {
+		Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+		intent.setType("image/*");
+		startActivity(Intent.createChooser(intent, "Select image"));
+	}
 
-    public void onGetImage(View view) {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("image/*");
-        startActivity(Intent.createChooser(intent, "Select image"));
-    }
-
-    public void onGetStream(View view) {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("*/*");
-        startActivity(Intent.createChooser(intent, "Select stream"));
-    }
+	/**
+	 * 调用系统程序
+	 */
+	public void onGetStream(View view) {
+		Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+		intent.setType("*/*");
+		startActivity(Intent.createChooser(intent, "Select stream"));
+	}
 }

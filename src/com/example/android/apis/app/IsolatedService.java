@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
 import android.util.Log;
@@ -33,174 +32,163 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
-// Need the following import to get access to the app resources, since this
-// class is in a sub-package.
 import com.example.android.apis.R;
 
 /**
- * This is an example if implementing a Service that uses android:isolatedProcess.
+ * android:isolatedProcess实现Service在特殊进程中运行
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-16 上午9:29:32
  */
 public class IsolatedService extends Service {
-    /**
-     * This is a list of callbacks that have been registered with the
-     * service.  Note that this is package scoped (instead of private) so
-     * that it can be accessed more efficiently from inner classes.
-     */
-    final RemoteCallbackList<IRemoteServiceCallback> mCallbacks
-            = new RemoteCallbackList<IRemoteServiceCallback>();
-    
-    int mValue = 0;
-    
-    @Override
-    public void onCreate() {
-        Log.i("IsolatedService", "Creating IsolatedService: " + this);
-    }
+	/**
+	 * 回调函数 RemoteCallbackList是线程与线程之间交流的的重要工具
+	 */
+	final RemoteCallbackList<IRemoteServiceCallback> mCallbacks = new RemoteCallbackList<IRemoteServiceCallback>();
 
-    @Override
-    public void onDestroy() {
-        Log.i("IsolatedService", "Destroying IsolatedService: " + this);
-        // Unregister all callbacks.
-        mCallbacks.kill();
-    }
+	int mValue = 0;
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        return mBinder;
-    }
+	@Override
+	public void onCreate() {
+		Log.i("IsolatedService", "Creating IsolatedService: " + this);
+	}
 
-    /**
-     * The IRemoteInterface is defined through IDL
-     */
-    private final IRemoteService.Stub mBinder = new IRemoteService.Stub() {
-        public void registerCallback(IRemoteServiceCallback cb) {
-            if (cb != null) mCallbacks.register(cb);
-        }
-        public void unregisterCallback(IRemoteServiceCallback cb) {
-            if (cb != null) mCallbacks.unregister(cb);
-        }
-    };
-    
-    @Override
-    public void onTaskRemoved(Intent rootIntent) {
-        Log.i("IsolatedService", "Task removed in " + this + ": " + rootIntent);
-        stopSelf();
-    }
+	@Override
+	public void onDestroy() {
+		Log.i("IsolatedService", "Destroying IsolatedService: " + this);
+		// Unregister all callbacks.
+		mCallbacks.kill();
+	}
 
-    private void broadcastValue(int value) {
-        // Broadcast to all clients the new value.
-        final int N = mCallbacks.beginBroadcast();
-        for (int i=0; i<N; i++) {
-            try {
-                mCallbacks.getBroadcastItem(i).valueChanged(value);
-            } catch (RemoteException e) {
-                // The RemoteCallbackList will take care of removing
-                // the dead object for us.
-            }
-        }
-        mCallbacks.finishBroadcast();
-    }
-    
-    // ----------------------------------------------------------------------
-    
-    public static class Controller extends Activity {
-        static class ServiceInfo {
-            final Activity mActivity;
-            final Class<?> mClz;
-            final TextView mStatus;
-            boolean mServiceBound;
-            IRemoteService mService;
+	@Override
+	public IBinder onBind(Intent intent) {
+		return mBinder;
+	}
 
-            ServiceInfo(Activity activity, Class<?> clz,
-                    int start, int stop, int bind, int status) {
-                mActivity = activity;
-                mClz = clz;
-                Button button = (Button)mActivity.findViewById(start);
-                button.setOnClickListener(mStartListener);
-                button = (Button)mActivity.findViewById(stop);
-                button.setOnClickListener(mStopListener);
-                CheckBox cb = (CheckBox)mActivity.findViewById(bind);
-                cb.setOnClickListener(mBindListener);
-                mStatus = (TextView)mActivity.findViewById(status);
-            }
+	/**
+	 * 接口描述语言
+	 */
+	private final IRemoteService.Stub mBinder = new IRemoteService.Stub() {
+		public void registerCallback(IRemoteServiceCallback cb) {
+			if (cb != null)
+				mCallbacks.register(cb);
+		}
 
-            void destroy() {
-                if (mServiceBound) {
-                    mActivity.unbindService(mConnection);
-                }
-            }
+		public void unregisterCallback(IRemoteServiceCallback cb) {
+			if (cb != null)
+				mCallbacks.unregister(cb);
+		}
+	};
 
-            private OnClickListener mStartListener = new OnClickListener() {
-                public void onClick(View v) {
-                    mActivity.startService(new Intent(mActivity, mClz));
-                }
-            };
+	@Override
+	public void onTaskRemoved(Intent rootIntent) {
+		Log.i("IsolatedService", "Task removed in " + this + ": " + rootIntent);
+		stopSelf();
+	}
 
-            private OnClickListener mStopListener = new OnClickListener() {
-                public void onClick(View v) {
-                    mActivity.stopService(new Intent(mActivity, mClz));
-                }
-            };
+	public static class Controller extends Activity {
+		static class ServiceInfo {
+			final Activity mActivity;
+			final Class<?> mClz;
+			final TextView mStatus;
+			boolean mServiceBound;
+			IRemoteService mService;
 
-            private OnClickListener mBindListener = new OnClickListener() {
-                public void onClick(View v) {
-                    if (((CheckBox)v).isChecked()) {
-                        if (!mServiceBound) {
-                            if (mActivity.bindService(new Intent(mActivity, mClz),
-                                    mConnection, Context.BIND_AUTO_CREATE)) {
-                                mServiceBound = true;
-                                mStatus.setText("BOUND");
-                            }
-                        }
-                    } else {
-                        if (mServiceBound) {
-                            mActivity.unbindService(mConnection);
-                            mServiceBound = false;
-                            mStatus.setText("");
-                        }
-                    }
-                }
-            };
+			ServiceInfo(Activity activity, Class<?> clz, int start, int stop,
+					int bind, int status) {
+				mActivity = activity;
+				mClz = clz;
+				Button button = (Button) mActivity.findViewById(start);
+				button.setOnClickListener(mStartListener);
+				button = (Button) mActivity.findViewById(stop);
+				button.setOnClickListener(mStopListener);
+				CheckBox cb = (CheckBox) mActivity.findViewById(bind);
+				cb.setOnClickListener(mBindListener);
+				mStatus = (TextView) mActivity.findViewById(status);
+			}
 
-            private ServiceConnection mConnection = new ServiceConnection() {
-                public void onServiceConnected(ComponentName className,
-                        IBinder service) {
-                    mService = IRemoteService.Stub.asInterface(service);
-                    if (mServiceBound) {
-                        mStatus.setText("CONNECTED");
-                    }
-                }
+			void destroy() {
+				if (mServiceBound) {
+					mActivity.unbindService(mConnection);
+				}
+			}
 
-                public void onServiceDisconnected(ComponentName className) {
-                    // This is called when the connection with the service has been
-                    // unexpectedly disconnected -- that is, its process crashed.
-                    mService = null;
-                    if (mServiceBound) {
-                        mStatus.setText("DISCONNECTED");
-                    }
-                }
-            };
-        }
+			private OnClickListener mStartListener = new OnClickListener() {
+				public void onClick(View v) {
+					mActivity.startService(new Intent(mActivity, mClz));
+				}
+			};
 
-        ServiceInfo mService1;
-        ServiceInfo mService2;
+			private OnClickListener mStopListener = new OnClickListener() {
+				public void onClick(View v) {
+					mActivity.stopService(new Intent(mActivity, mClz));
+				}
+			};
 
-        @Override
-        protected void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
+			private OnClickListener mBindListener = new OnClickListener() {
+				public void onClick(View v) {
+					if (((CheckBox) v).isChecked()) {
+						if (!mServiceBound) {
+							if (mActivity.bindService(new Intent(mActivity,
+									mClz), mConnection,
+									Context.BIND_AUTO_CREATE)) {
+								mServiceBound = true;
+								mStatus.setText("BOUND");
+							}
+						}
+					} else {
+						if (mServiceBound) {
+							mActivity.unbindService(mConnection);
+							mServiceBound = false;
+							mStatus.setText("");
+						}
+					}
+				}
+			};
+			/**
+			 * 使用ServiceConnection，客户端可以绑定到一个service，通过把它传给bindService()
+			 */
+			private ServiceConnection mConnection = new ServiceConnection() {
+				// 系统调用这个来传送在service的onBind()中返回的IBinder．
+				public void onServiceConnected(ComponentName className,
+						IBinder service) {
+					mService = IRemoteService.Stub.asInterface(service);
+					if (mServiceBound) {
+						mStatus.setText("CONNECTED");
+					}
+				}
 
-            setContentView(R.layout.isolated_service_controller);
+				// 同service的连接意外丢失时调用这个．比如当service崩溃了或被强杀了．当客户端解除绑定时，这个方法不会被调用．
+				public void onServiceDisconnected(ComponentName className) {
+					mService = null;
+					if (mServiceBound) {
+						mStatus.setText("DISCONNECTED");
+					}
+				}
+			};
+		}
 
-            mService1 = new ServiceInfo(this, IsolatedService.class, R.id.start1, R.id.stop1,
-                    R.id.bind1, R.id.status1);
-            mService2 = new ServiceInfo(this, IsolatedService2.class, R.id.start2, R.id.stop2,
-                    R.id.bind2, R.id.status2);
-        }
+		ServiceInfo mService1;
+		ServiceInfo mService2;
 
-        @Override
-        protected void onDestroy() {
-            super.onDestroy();
-            mService1.destroy();
-            mService2.destroy();
-        }
-    }
+		@Override
+		protected void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
+
+			setContentView(R.layout.isolated_service_controller);
+
+			mService1 = new ServiceInfo(this, IsolatedService.class,
+					R.id.start1, R.id.stop1, R.id.bind1, R.id.status1);
+			mService2 = new ServiceInfo(this, IsolatedService2.class,
+					R.id.start2, R.id.stop2, R.id.bind2, R.id.status2);
+		}
+
+		@Override
+		protected void onDestroy() {
+			super.onDestroy();
+			mService1.destroy();
+			mService2.destroy();
+		}
+	}
 }
