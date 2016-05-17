@@ -16,7 +16,7 @@
 
 package com.example.android.apis.app;
 
-import com.example.android.apis.R;
+import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
@@ -42,7 +42,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.util.List;
+import com.example.android.apis.R;
 
 /**
  * 设备管理示例Demo
@@ -54,9 +54,8 @@ import java.util.List;
 @SuppressLint("NewApi")
 public class DeviceAdminSample extends PreferenceActivity {
 
-	// Miscellaneous utilities and definitions
+	// TAG标签
 	private static final String TAG = "DeviceAdminSample";
-
 	private static final int REQUEST_CODE_ENABLE_ADMIN = 1;
 	private static final int REQUEST_CODE_START_ENCRYPTION = 2;
 
@@ -131,25 +130,27 @@ public class DeviceAdminSample extends PreferenceActivity {
 	}
 
 	/**
-	 * Helper to determine if we are an active admin
+	 * 判断组件管理权限
+	 * 
+	 * @description：
+	 * @author ldm
+	 * @date 2016-5-16 上午9:15:09
 	 */
 	private boolean isActiveAdmin() {
-		// // 判断该组件是否有系统管理员的权限
+		// 判断该组件是否有系统管理员的权限
 		return mDPM.isAdminActive(mDeviceAdminSample);
 	}
 
 	/**
-	 * Common fragment code for DevicePolicyManager access. Provides two shared
-	 * elements:
-	 * 
-	 * 1. Provides instance variables to access activity/context,
-	 * DevicePolicyManager, etc. 2. Provides support for the "set password"
-	 * button(s) shared by multiple fragments.
+	 * 对于devicepolicymanager访问Fragment编码。提供共享元素：
+	 * 1:提供了实例变量的访问活动中，devicepolicymanager等。
+	 *  2:为“设置密码”按钮（由多个Fragment共享 ）提供支持。
 	 */
+
 	public static class AdminSampleFragment extends PreferenceFragment
 			implements OnPreferenceChangeListener, OnPreferenceClickListener {
 
-		// Useful instance variables
+		// 有用的实例变量
 		protected DeviceAdminSample mActivity;
 		protected DevicePolicyManager mDPM;
 		protected ComponentName mDeviceAdminSample;
@@ -163,16 +164,16 @@ public class DeviceAdminSample extends PreferenceActivity {
 		public void onActivityCreated(Bundle savedInstanceState) {
 			super.onActivityCreated(savedInstanceState);
 
-			// Retrieve the useful instance variables
+			// 获取变量的实例
 			mActivity = (DeviceAdminSample) getActivity();
 			mDPM = mActivity.mDPM;
 			mDeviceAdminSample = mActivity.mDeviceAdminSample;
 			mAdminActive = mActivity.isActiveAdmin();
 
-			// Configure the shared UI elements (if they exist)
+			// 初始化UI
 			mResetPassword = (EditTextPreference) findPreference(KEY_RESET_PASSWORD);
 			mSetPassword = (PreferenceScreen) findPreference(KEY_SET_PASSWORD);
-
+			// 为EditTextPreference设置监听
 			if (mResetPassword != null) {
 				mResetPassword.setOnPreferenceChangeListener(this);
 			}
@@ -186,7 +187,7 @@ public class DeviceAdminSample extends PreferenceActivity {
 			super.onResume();
 			mAdminActive = mActivity.isActiveAdmin();
 			reloadSummaries();
-			// Resetting the password via API is available only to active admins
+			// 重置密码提供给活动管理员
 			if (mResetPassword != null) {
 				mResetPassword.setEnabled(mAdminActive);
 			}
@@ -199,7 +200,7 @@ public class DeviceAdminSample extends PreferenceActivity {
 		protected void reloadSummaries() {
 			if (mSetPassword != null) {
 				if (mAdminActive) {
-					// Show password-sufficient status under Set Password button
+					// 显示密码
 					boolean sufficient = mDPM.isActivePasswordSufficient();
 					mSetPassword
 							.setSummary(sufficient ? R.string.password_sufficient
@@ -233,8 +234,11 @@ public class DeviceAdminSample extends PreferenceActivity {
 		}
 
 		/**
-		 * This is dangerous, so we prevent automated tests from doing it, and
-		 * we remind the user after we do it.
+		 * 重置密码操作
+		 * 
+		 * @description：
+		 * @author ldm
+		 * @date 2016-5-16 上午9:21:06
 		 */
 		private void doResetPassword(String newPassword) {
 			if (alertIfMonkey(mActivity, R.string.monkey_reset_password)) {
@@ -250,10 +254,6 @@ public class DeviceAdminSample extends PreferenceActivity {
 			builder.show();
 		}
 
-		/**
-		 * Simple helper for summaries showing local & global (aggregate) policy
-		 * settings
-		 */
 		protected String localGlobalSummary(Object local, Object global) {
 			return getString(R.string.status_local_global, local, global);
 		}
@@ -273,9 +273,9 @@ public class DeviceAdminSample extends PreferenceActivity {
 		@Override
 		public void onCreate(Bundle savedInstanceState) {
 			super.onCreate(savedInstanceState);
-			//给这个PreferenceActivity指定了一个xml
+			// 给这个PreferenceActivity指定了一个xml
 			addPreferencesFromResource(R.xml.device_admin_general);
-			//关联对应Preference
+			// 关联对应Preference
 			mEnableCheckbox = (CheckBoxPreference) findPreference(KEY_ENABLE_ADMIN);
 			mEnableCheckbox.setOnPreferenceChangeListener(this);
 			mDisableCameraCheckbox = (CheckBoxPreference) findPreference(KEY_DISABLE_CAMERA);
@@ -312,6 +312,7 @@ public class DeviceAdminSample extends PreferenceActivity {
 			return flags;
 		}
 
+		@SuppressLint("NewApi")
 		@Override
 		public boolean onPreferenceChange(Preference preference, Object newValue) {
 			if (super.onPreferenceChange(preference, newValue)) {
@@ -470,6 +471,7 @@ public class DeviceAdminSample extends PreferenceActivity {
 			int local, global;
 			local = mDPM.getPasswordQuality(mDeviceAdminSample);
 			global = mDPM.getPasswordQuality(null);
+			// 动态设置Summary
 			mPasswordQuality.setSummary(localGlobalSummary(
 					qualityValueToString(local), qualityValueToString(global)));
 			local = mDPM.getPasswordMinimumLength(mDeviceAdminSample);
@@ -983,14 +985,6 @@ public class DeviceAdminSample extends PreferenceActivity {
 		}
 	}
 
-	/**
-	 * Sample implementation of a DeviceAdminReceiver. Your controller must
-	 * provide one, although you may or may not implement all of the methods
-	 * shown here.
-	 * 
-	 * All callbacks are on the UI thread and your implementations should not
-	 * engage in any blocking operations, including disk I/O.
-	 */
 	// DeviceAdminReceiver设备管理接收者，该类提供了系统发出的意图动作。你的设备管理应用程序必须包含一个DeviceAdminReceiver
 	// 的子类。代表着手机上的设备管理器。
 	public static class DeviceAdminSampleReceiver extends DeviceAdminReceiver {

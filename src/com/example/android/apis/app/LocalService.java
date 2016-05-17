@@ -23,98 +23,84 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
-import android.util.Log;
 import android.widget.Toast;
 
+import com.example.android.apis.R;
 // Need the following import to get access to the app resources, since this
 // class is in a sub-package.
-import com.example.android.apis.R;
 
 /**
- * This is an example of implementing an application service that runs locally
- * in the same process as the application.  The {@link LocalServiceActivities.Controller}
- * and {@link LocalServiceActivities.Binding} classes show how to interact with the
- * service.
- *
- * <p>Notice the use of the {@link NotificationManager} when interesting things
- * happen in the service.  This is generally how background services should
- * interact with the user, rather than doing something more disruptive such as
- * calling startActivity().
+ * 本地服务Service
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-16 上午11:59:00
  */
 
 public class LocalService extends Service {
-    private NotificationManager mNM;
+	// 通知管理器
+	private NotificationManager mNM;
 
-    // Unique Identification Number for the Notification.
-    // We use it on Notification start, and to cancel it.
-    private int NOTIFICATION = R.string.local_service_started;
+	// 定义唯一的NOTIFICATIONID
+	private int NOTIFICATION = R.string.local_service_started;
 
-    /**
-     * Class for clients to access.  Because we know this service always
-     * runs in the same process as its clients, we don't need to deal with
-     * IPC.
-     */
-    public class LocalBinder extends Binder {
-        LocalService getService() {
-            return LocalService.this;
-        }
-    }
-    
-    @Override
-    public void onCreate() {
-        mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+	/**
+	 * 
+	 * @description：http://www.cnblogs.com/innost/archive/2011/01/09/1931456.html
+	 * @author ldm
+	 * @date 2016-5-16 上午11:59:56
+	 */
+	public class LocalBinder extends Binder {
+		LocalService getService() {
+			return LocalService.this;
+		}
+	}
 
-        // Display a notification about us starting.  We put an icon in the status bar.
-        showNotification();
-    }
+	@Override
+	public void onCreate() {
+		// 实例化NotificationManager
+		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		// 显示通知
+		showNotification();
+	}
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i("LocalService", "Received start id " + startId + ": " + intent);
-        // We want this service to continue running until it is explicitly
-        // stopped, so return sticky.
-        return START_STICKY;
-    }
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		/**
+		 * 在运行onStartCommand后service进程被kill后，那将保留在开始状态，但是不保留那些传入的intent。
+		 * 不久后service就会再次尝试重新创建，因为保留在开始状态，在创建
+		 * service后将保证调用onstartCommand。如果没有传递任何开始命令给service，那将获取到null的intent
+		 */
+		return START_STICKY;
+	}
 
-    @Override
-    public void onDestroy() {
-        // Cancel the persistent notification.
-        mNM.cancel(NOTIFICATION);
+	@Override
+	public void onDestroy() {
+		mNM.cancel(NOTIFICATION);
+		Toast.makeText(this, R.string.local_service_stopped, Toast.LENGTH_SHORT)
+				.show();
+	}
 
-        // Tell the user we stopped.
-        Toast.makeText(this, R.string.local_service_stopped, Toast.LENGTH_SHORT).show();
-    }
+	@Override
+	public IBinder onBind(Intent intent) {
+		return mBinder;
+	}
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        return mBinder;
-    }
+	private final IBinder mBinder = new LocalBinder();
 
-    // This is the object that receives interactions from clients.  See
-    // RemoteService for a more complete example.
-    private final IBinder mBinder = new LocalBinder();
-
-    /**
-     * Show a notification while this service is running.
-     */
-    private void showNotification() {
-        // In this sample, we'll use the same text for the ticker and the expanded notification
-        CharSequence text = getText(R.string.local_service_started);
-
-        // Set the icon, scrolling text and timestamp
-        Notification notification = new Notification(R.drawable.stat_sample, text,
-                System.currentTimeMillis());
-
-        // The PendingIntent to launch our activity if the user selects this notification
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, LocalServiceActivities.Controller.class), 0);
-
-        // Set the info for the views that show in the notification panel.
-        notification.setLatestEventInfo(this, getText(R.string.local_service_label),
-                       text, contentIntent);
-
-        // Send the notification.
-        mNM.notify(NOTIFICATION, notification);
-    }
+	@SuppressWarnings("deprecation")
+	private void showNotification() {
+		// 标题
+		CharSequence text = getText(R.string.local_service_started);
+		// 图标
+		Notification notification = new Notification(R.drawable.stat_sample,
+				text, System.currentTimeMillis());
+		// 点击通知跳转
+		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
+				new Intent(this, LocalServiceActivities.Controller.class), 0);
+		notification.setLatestEventInfo(this,
+				getText(R.string.local_service_label), text, contentIntent);
+		// 发送通知
+		mNM.notify(NOTIFICATION, notification);
+	}
 }
-

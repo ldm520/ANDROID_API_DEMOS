@@ -30,93 +30,103 @@ import android.widget.RemoteViews;
 import com.example.android.apis.R;
 
 /**
- * A widget provider.  We have a string that we pull from a preference in order to show
- * the configuration settings and the current time when the widget was updated.  We also
- * register a BroadcastReceiver for time-changed and timezone-changed broadcasts, and
- * update then too.
- *
- * <p>See also the following files:
- * <ul>
- *   <li>ExampleAppWidgetConfigure.java</li>
- *   <li>ExampleBroadcastReceiver.java</li>
- *   <li>res/layout/appwidget_configure.xml</li>
- *   <li>res/layout/appwidget_provider.xml</li>
- *   <li>res/xml/appwidget_provider.xml</li>
- * </ul>
+ * AppWidgetProvider小部件广播组件使用：
+ * 1， 实现AppWidgetProvider的子类，并至少override onUpdate()方法
+ * 2，在AndroidManifest.xml中，声明上述的AppWidgetProvider的子类是一个Receiver，并且：
+ * 该Receiver的intent-filter的Action必须包含“android.appwidget.action.APPWIDGET_UPDATE”；
+ * 该Receiver的meta-data为“android.appwidget.provider”，并用一个xml文件来描述布局属性。
+ * 3， 在第2点中的xml文件中描述布局属性的节点名称必须为“appwidget-provider”。
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-16 下午1:43:31
  */
 public class ExampleAppWidgetProvider extends AppWidgetProvider {
-    // log tag
-    private static final String TAG = "ExampleAppWidgetProvider";
+	// Log打印日志标签
+	private static final String TAG = "ExampleAppWidgetProvider";
 
-    @Override
-    public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        Log.d(TAG, "onUpdate");
-        // For each widget that needs an update, get the text that we should display:
-        //   - Create a RemoteViews object for it
-        //   - Set the text in the RemoteViews object
-        //   - Tell the AppWidgetManager to show that views object for the widget.
-        final int N = appWidgetIds.length;
-        for (int i=0; i<N; i++) {
-            int appWidgetId = appWidgetIds[i];
-            String titlePrefix = ExampleAppWidgetConfigure.loadTitlePref(context, appWidgetId);
-            updateAppWidget(context, appWidgetManager, appWidgetId, titlePrefix);
-        }
-    }
-    
-    @Override
-    public void onDeleted(Context context, int[] appWidgetIds) {
-        Log.d(TAG, "onDeleted");
-        // When the user deletes the widget, delete the preference associated with it.
-        final int N = appWidgetIds.length;
-        for (int i=0; i<N; i++) {
-            ExampleAppWidgetConfigure.deleteTitlePref(context, appWidgetIds[i]);
-        }
-    }
+	/**
+	 * onUpdate() 处理AppWidgetManager.ACTION_APPWIDGET_UPDATE广播。
+	 * 该广播在需要AppWidgetProvider提供RemoteViews数据时
+	 * ，由AppWidgetService.sendUpdateIntentLocked()发出。
+	 */
+	@Override
+	public void onUpdate(Context context, AppWidgetManager appWidgetManager,
+			int[] appWidgetIds) {
+		Log.d(TAG, "onUpdate");
 
-    @Override
-    public void onEnabled(Context context) {
-        Log.d(TAG, "onEnabled");
-        // When the first widget is created, register for the TIMEZONE_CHANGED and TIME_CHANGED
-        // broadcasts.  We don't want to be listening for these if nobody has our widget active.
-        // This setting is sticky across reboots, but that doesn't matter, because this will
-        // be called after boot if there is a widget instance for this provider.
-        PackageManager pm = context.getPackageManager();
-        pm.setComponentEnabledSetting(
-                new ComponentName("com.example.android.apis", ".appwidget.ExampleBroadcastReceiver"),
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                PackageManager.DONT_KILL_APP);
-    }
+		final int N = appWidgetIds.length;
+		for (int i = 0; i < N; i++) {
+			//获取到id
+			int appWidgetId = appWidgetIds[i];
+			//设置标题
+			String titlePrefix = ExampleAppWidgetConfigure.loadTitlePref(
+					context, appWidgetId);
+			//更新AppWidget
+			updateAppWidget(context, appWidgetManager, appWidgetId, titlePrefix);
+		}
+	}
 
-    @Override
-    public void onDisabled(Context context) {
-        // When the first widget is created, stop listening for the TIMEZONE_CHANGED and
-        // TIME_CHANGED broadcasts.
-        Log.d(TAG, "onDisabled");
-        PackageManager pm = context.getPackageManager();
-        pm.setComponentEnabledSetting(
-                new ComponentName("com.example.android.apis", ".appwidget.ExampleBroadcastReceiver"),
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                PackageManager.DONT_KILL_APP);
-    }
+	/**
+	 * onDeleted() 处理AppWidgetManager.ACTION_APPWIDGET_DELETED广播。
+	 * 该广播在有该AppWidgetProvider的实例被删除时
+	 * ，由AppWidgetService.deleteAppWidgetLocked()发出。
+	 */
+	@Override
+	public void onDeleted(Context context, int[] appWidgetIds) {
+		Log.d(TAG, "onDeleted");
+		final int N = appWidgetIds.length;
+		for (int i = 0; i < N; i++) {
+			ExampleAppWidgetConfigure.deleteTitlePref(context, appWidgetIds[i]);
+		}
+	}
 
-    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-            int appWidgetId, String titlePrefix) {
-        Log.d(TAG, "updateAppWidget appWidgetId=" + appWidgetId + " titlePrefix=" + titlePrefix);
-        // Getting the string this way allows the string to be localized.  The format
-        // string is filled in using java.util.Formatter-style format strings.
-        CharSequence text = context.getString(R.string.appwidget_text_format,
-                ExampleAppWidgetConfigure.loadTitlePref(context, appWidgetId),
-                "0x" + Long.toHexString(SystemClock.elapsedRealtime()));
+	/**
+	 * onEnabled() 处理AppWidgetManager.ACTION_APPWIDGET_ENABLED广播。
+	 * 该广播在该AppWidgetProvider被实例化时，由AppWidgetService.sendEnableIntentLocked()发出。
+	 */
+	@Override
+	public void onEnabled(Context context) {
+		Log.d(TAG, "onEnabled");
+		PackageManager pm = context.getPackageManager();
+		pm.setComponentEnabledSetting(new ComponentName(
+				"com.example.android.apis",
+				".appwidget.ExampleBroadcastReceiver"),
+				PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+				PackageManager.DONT_KILL_APP);
+	}
 
-        // Construct the RemoteViews object.  It takes the package name (in our case, it's our
-        // package, but it needs this because on the other side it's the widget host inflating
-        // the layout from our package).
-        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.appwidget_provider);
-        views.setTextViewText(R.id.appwidget_text, text);
+	/**
+	 * onDisabled() 处理AppWidgetManager.ACTION_APPWIDGET_DISABLED广播。
+	 * 该广播在该AppWidgetProvider的所有实例中的最后一个实例被删除时
+	 * ，由AppWidgetService.deleteAppWidgetLocked()发出。
+	 */
+	@Override
+	public void onDisabled(Context context) {
+		Log.d(TAG, "onDisabled");
+		PackageManager pm = context.getPackageManager();
+		//设置组件可用
+		pm.setComponentEnabledSetting(new ComponentName(
+				"com.example.android.apis",
+				".appwidget.ExampleBroadcastReceiver"),
+				PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+				PackageManager.DONT_KILL_APP);
+	}
 
-        // Tell the widget manager
-        appWidgetManager.updateAppWidget(appWidgetId, views);
-    }
+	static void updateAppWidget(Context context,
+			AppWidgetManager appWidgetManager, int appWidgetId,
+			String titlePrefix) {
+		Log.d(TAG, "updateAppWidget appWidgetId=" + appWidgetId
+				+ " titlePrefix=" + titlePrefix);
+		CharSequence text = context.getString(R.string.appwidget_text_format,
+				ExampleAppWidgetConfigure.loadTitlePref(context, appWidgetId),
+				"0x" + Long.toHexString(SystemClock.elapsedRealtime()));
+		// 创建RemoteViews 对象
+		RemoteViews views = new RemoteViews(context.getPackageName(),
+				R.layout.appwidget_provider);
+		// 设置RemoteViews 对象的文本
+		views.setTextViewText(R.id.appwidget_text, text);
+		// 告诉AppWidgetManager 显示 views对象给widget.
+		appWidgetManager.updateAppWidget(appWidgetId, views);
+	}
 }
-
-

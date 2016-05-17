@@ -28,26 +28,28 @@ import android.widget.Button;
 import com.example.android.apis.R;
 
 /**
- * Front-end for launching {@link LocalSampleInstrumentation} example
- * instrumentation class.
+ * Android CTS测试Demo
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-16 上午11:43:59
  */
 public class LocalSample extends Activity {
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.local_sample);
+		setContentView(R.layout.local_sample);
+		Button button = (Button) findViewById(R.id.go);
+		button.setOnClickListener(mGoListener);
+	}
 
-        // Watch for button clicks.
-        Button button = (Button)findViewById(R.id.go);
-        button.setOnClickListener(mGoListener);
-    }
-
-    private OnClickListener mGoListener = new OnClickListener() {
-        public void onClick(View v) {
-            startInstrumentation(new ComponentName(LocalSample.this,
-                    LocalSampleInstrumentation.class), null, null);
-        }
-    };
+	private OnClickListener mGoListener = new OnClickListener() {
+		public void onClick(View v) {
+			// 在activity中 启动Instrumentation 以便调用运行测试项目
+			// ActivityInstrumentationTestCase2
+			startInstrumentation(new ComponentName(LocalSample.this,
+					LocalSampleInstrumentation.class), null, null);
+		}
+	};
 }
-

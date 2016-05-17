@@ -16,13 +16,18 @@
 
 package com.example.android.apis.app;
 
-// Need the following import to get access to the app resources, since this
-// class is in a sub-package.
 import com.example.android.apis.R;
 
 import android.app.Activity;
 import android.os.Bundle;
 
+/**
+ * 演示跳转的目标Activity,只是个提示页面，未进行相关操作
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-16 上午9:25:58
+ */
 public class ForwardTarget extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

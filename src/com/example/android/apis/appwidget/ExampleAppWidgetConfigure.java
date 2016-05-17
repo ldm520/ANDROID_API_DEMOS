@@ -32,103 +32,93 @@ import java.util.ArrayList;
 import com.example.android.apis.R;
 
 /**
- * The configuration screen for the ExampleAppWidgetProvider widget sample.
+ * 桌面小部件 AppWidget配置
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-16 下午1:57:16
  */
 public class ExampleAppWidgetConfigure extends Activity {
-    static final String TAG = "ExampleAppWidgetConfigure";
+	static final String TAG = "ExampleAppWidgetConfigure";
+	// 保存的文件名
+	private static final String PREFS_NAME = "com.example.android.apis.appwidget.ExampleAppWidgetProvider";
+	// 保存的字段KEY
+	private static final String PREF_PREFIX_KEY = "prefix_";
+	// 小部件 对应ID
+	int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
+	// 输入框
+	EditText mAppWidgetPrefix;
 
-    private static final String PREFS_NAME
-            = "com.example.android.apis.appwidget.ExampleAppWidgetProvider";
-    private static final String PREF_PREFIX_KEY = "prefix_";
+	public ExampleAppWidgetConfigure() {
+		super();
+	}
 
-    int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
-    EditText mAppWidgetPrefix;
+	@Override
+	public void onCreate(Bundle icicle) {
+		super.onCreate(icicle);
+		setResult(RESULT_CANCELED);
+		// 设置布局
+		setContentView(R.layout.appwidget_configure);
+		mAppWidgetPrefix = (EditText) findViewById(R.id.appwidget_prefix);
+		// 设置监听
+		findViewById(R.id.save_button).setOnClickListener(mOnClickListener);
+		// 获取intent传递过来的数据
+		Intent intent = getIntent();
+		Bundle extras = intent.getExtras();
+		if (extras != null) {
+			mAppWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID,
+					AppWidgetManager.INVALID_APPWIDGET_ID);
+		}
 
-    public ExampleAppWidgetConfigure() {
-        super();
-    }
+		if (mAppWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
+			finish();
+		}
 
-    @Override
-    public void onCreate(Bundle icicle) {
-        super.onCreate(icicle);
+		mAppWidgetPrefix.setText(loadTitlePref(ExampleAppWidgetConfigure.this,
+				mAppWidgetId));
+	}
 
-        // Set the result to CANCELED.  This will cause the widget host to cancel
-        // out of the widget placement if they press the back button.
-        setResult(RESULT_CANCELED);
+	View.OnClickListener mOnClickListener = new View.OnClickListener() {
+		public void onClick(View v) {
+			final Context context = ExampleAppWidgetConfigure.this;
+			String titlePrefix = mAppWidgetPrefix.getText().toString();
+			//保存到SharedPreferences文件
+			saveTitlePref(context, mAppWidgetId, titlePrefix);
+			AppWidgetManager appWidgetManager = AppWidgetManager
+					.getInstance(context);
+			//更新小部件 
+			ExampleAppWidgetProvider.updateAppWidget(context, appWidgetManager,
+					mAppWidgetId, titlePrefix);
 
-        // Set the view layout resource to use.
-        setContentView(R.layout.appwidget_configure);
+			Intent resultValue = new Intent();
+			resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
+					mAppWidgetId);
+			setResult(RESULT_OK, resultValue);
+			finish();
+		}
+	};
 
-        // Find the EditText
-        mAppWidgetPrefix = (EditText)findViewById(R.id.appwidget_prefix);
+	static void saveTitlePref(Context context, int appWidgetId, String text) {
+		SharedPreferences.Editor prefs = context.getSharedPreferences(
+				PREFS_NAME, 0).edit();
+		prefs.putString(PREF_PREFIX_KEY + appWidgetId, text);
+		prefs.commit();
+	}
 
-        // Bind the action for the save button.
-        findViewById(R.id.save_button).setOnClickListener(mOnClickListener);
+	static String loadTitlePref(Context context, int appWidgetId) {
+		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
+		String prefix = prefs.getString(PREF_PREFIX_KEY + appWidgetId, null);
+		if (prefix != null) {
+			return prefix;
+		} else {
+			return context.getString(R.string.appwidget_prefix_default);
+		}
+	}
 
-        // Find the widget id from the intent. 
-        Intent intent = getIntent();
-        Bundle extras = intent.getExtras();
-        if (extras != null) {
-            mAppWidgetId = extras.getInt(
-                    AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
-        }
+	static void deleteTitlePref(Context context, int appWidgetId) {
+	}
 
-        // If they gave us an intent without the widget id, just bail.
-        if (mAppWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
-            finish();
-        }
-
-        mAppWidgetPrefix.setText(loadTitlePref(ExampleAppWidgetConfigure.this, mAppWidgetId));
-    }
-
-    View.OnClickListener mOnClickListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            final Context context = ExampleAppWidgetConfigure.this;
-
-            // When the button is clicked, save the string in our prefs and return that they
-            // clicked OK.
-            String titlePrefix = mAppWidgetPrefix.getText().toString();
-            saveTitlePref(context, mAppWidgetId, titlePrefix);
-
-            // Push widget update to surface with newly set prefix
-            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-            ExampleAppWidgetProvider.updateAppWidget(context, appWidgetManager,
-                    mAppWidgetId, titlePrefix);
-
-            // Make sure we pass back the original appWidgetId
-            Intent resultValue = new Intent();
-            resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
-            setResult(RESULT_OK, resultValue);
-            finish();
-        }
-    };
-
-    // Write the prefix to the SharedPreferences object for this widget
-    static void saveTitlePref(Context context, int appWidgetId, String text) {
-        SharedPreferences.Editor prefs = context.getSharedPreferences(PREFS_NAME, 0).edit();
-        prefs.putString(PREF_PREFIX_KEY + appWidgetId, text);
-        prefs.commit();
-    }
-
-    // Read the prefix from the SharedPreferences object for this widget.
-    // If there is no preference saved, get the default from a resource
-    static String loadTitlePref(Context context, int appWidgetId) {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
-        String prefix = prefs.getString(PREF_PREFIX_KEY + appWidgetId, null);
-        if (prefix != null) {
-            return prefix;
-        } else {
-            return context.getString(R.string.appwidget_prefix_default);
-        }
-    }
-
-    static void deleteTitlePref(Context context, int appWidgetId) {
-    }
-
-    static void loadAllTitlePrefs(Context context, ArrayList<Integer> appWidgetIds,
-            ArrayList<String> texts) {
-    }
+	static void loadAllTitlePrefs(Context context,
+			ArrayList<Integer> appWidgetIds, ArrayList<String> texts) {
+	}
 }
-
-
-

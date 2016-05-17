@@ -25,21 +25,22 @@ import android.util.Log;
 import java.util.ArrayList;
 
 /**
- * A BroadcastReceiver that listens for updates for the ExampleAppWidgetProvider.  This
- * BroadcastReceiver starts off disabled, and we only enable it when there is a widget
- * instance created, in order to only receive notifications when we need them.
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-16 下午1:49:28
  */
 public class ExampleBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d("ExmampleBroadcastReceiver", "intent=" + intent);
-
-        // For our example, we'll also update all of the widgets when the timezone
-        // changes, or the user or network sets the time.
+        //获取广播的ACTION
         String action = intent.getAction();
+        //对ACTION进行判断
         if (action.equals(Intent.ACTION_TIMEZONE_CHANGED)
                 || action.equals(Intent.ACTION_TIME_CHANGED)) {
+        	
             AppWidgetManager gm = AppWidgetManager.getInstance(context);
             ArrayList<Integer> appWidgetIds = new ArrayList<Integer>();
             ArrayList<String> texts = new ArrayList<String>();
