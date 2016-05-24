@@ -24,7 +24,13 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.ContactsContract.Contacts;
 import android.widget.AutoCompleteTextView;
-
+/**
+ * 文字自动提示输入框AutoCompleteTextView
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-17 上午11:06:24
+ */
 public class AutoComplete5 extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {

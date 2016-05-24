@@ -26,81 +26,93 @@ import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
+
 /**
  * 长按多选，添加了选择模式
+ * 
  * @description：
  * @author ldm
  * @date 2016-4-21 上午10:47:55
  */
 public class ChoiceModeList extends ListActivity {
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        ListView lv = getListView();
-        lv.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-        lv.setMultiChoiceModeListener(new ModeCallback());
-        setListAdapter(new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_checked, mStrings));
-    }
-    
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        getActionBar().setSubtitle("Long press to start selection");
-    }
-    
-    private class ModeCallback implements ListView.MultiChoiceModeListener {
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		// 获取ListActivity中所包含的ListView对象
+		ListView lv = getListView();
+		// 设置ListView选择模式
+		lv.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+		// 设置选择监听
+		lv.setMultiChoiceModeListener(new ModeCallback());
+		setListAdapter(new ArrayAdapter<String>(this,
+				android.R.layout.simple_list_item_checked, mStrings));
+	}
 
-        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            MenuInflater inflater = getMenuInflater();
-            inflater.inflate(R.menu.list_select_menu, menu);
-            mode.setTitle("Select Items");
-            setSubtitle(mode);
-            return true;
-        }
+	// Activity彻底运行起来之后的回调
+	@Override
+	protected void onPostCreate(Bundle savedInstanceState) {
+		super.onPostCreate(savedInstanceState);
+		// 改变显示在程序图标旁边的文字
+		getActionBar().setSubtitle("Long press to start selection");
+	}
 
-        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-            return true;
-        }
+	private class ModeCallback implements ListView.MultiChoiceModeListener {
+		// 创建菜单
+		public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+			MenuInflater inflater = getMenuInflater();
+			// 添加菜单布局xml文件
+			inflater.inflate(R.menu.list_select_menu, menu);
+			mode.setTitle("Select Items");
+			setSubtitle(mode);
+			return true;
+		}
 
-        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            switch (item.getItemId()) {
-            case R.id.share:
-                Toast.makeText(ChoiceModeList.this, "Shared " + getListView().getCheckedItemCount() +
-                        " items", Toast.LENGTH_SHORT).show();
-                mode.finish();
-                break;
-            default:
-                Toast.makeText(ChoiceModeList.this, "Clicked " + item.getTitle(),
-                        Toast.LENGTH_SHORT).show();
-                break;
-            }
-            return true;
-        }
+		public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+			return true;
+		}
 
-        public void onDestroyActionMode(ActionMode mode) {
-        }
+		// 菜单的点击事件
+		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+			switch (item.getItemId()) {
+			case R.id.share:
+				Toast.makeText(
+						ChoiceModeList.this,
+						"Shared " + getListView().getCheckedItemCount()
+								+ " items", Toast.LENGTH_SHORT).show();
+				mode.finish();
+				break;
+			default:
+				Toast.makeText(ChoiceModeList.this,
+						"Clicked " + item.getTitle(), Toast.LENGTH_SHORT)
+						.show();
+				break;
+			}
+			return true;
+		}
 
-        public void onItemCheckedStateChanged(ActionMode mode,
-                int position, long id, boolean checked) {
-            setSubtitle(mode);
-        }
+		public void onDestroyActionMode(ActionMode mode) {
+		}
 
-        private void setSubtitle(ActionMode mode) {
-            final int checkedCount = getListView().getCheckedItemCount();
-            switch (checkedCount) {
-                case 0:
-                    mode.setSubtitle(null);
-                    break;
-                case 1:
-                    mode.setSubtitle("One item selected");
-                    break;
-                default:
-                    mode.setSubtitle("" + checkedCount + " items selected");
-                    break;
-            }
-        }
-    }
+		public void onItemCheckedStateChanged(ActionMode mode, int position,
+				long id, boolean checked) {
+			setSubtitle(mode);
+		}
 
-    private String[] mStrings = Cheeses.sCheeseStrings;
+		private void setSubtitle(ActionMode mode) {
+			final int checkedCount = getListView().getCheckedItemCount();
+			switch (checkedCount) {
+			case 0:
+				mode.setSubtitle(null);
+				break;
+			case 1:
+				mode.setSubtitle("One item selected");
+				break;
+			default:
+				mode.setSubtitle("" + checkedCount + " items selected");
+				break;
+			}
+		}
+	}
+
+	private String[] mStrings = Cheeses.sCheeseStrings;
 }

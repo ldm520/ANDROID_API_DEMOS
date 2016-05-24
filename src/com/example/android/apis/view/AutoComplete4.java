@@ -34,70 +34,86 @@ import android.widget.FilterQueryProvider;
 import android.widget.Filterable;
 import android.widget.TextView;
 
+/**
+ * 文字自动提示输入框AutoCompleteTextView
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-17 上午11:06:24
+ */
 public class AutoComplete4 extends Activity {
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.autocomplete_4);
+	private static final int COLUMN_DISPLAY_NAME = 1;
+	// 查询联系人字段
+	public static final String[] CONTACT_PROJECTION = new String[] {
+			Contacts._ID, Contacts.DISPLAY_NAME };
 
-        ContentResolver content = getContentResolver();
-        Cursor cursor = content.query(Contacts.CONTENT_URI,
-                CONTACT_PROJECTION, null, null, null);
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.autocomplete_4);
+		// 通过上下文获取到ContentResolver
+		ContentResolver content = getContentResolver();
+		// 初始化数据库操作Cursor
+		Cursor cursor = content.query(Contacts.CONTENT_URI, CONTACT_PROJECTION,
+				null, null, null);
+		// 联系人适配器
+		ContactListAdapter adapter = new ContactListAdapter(this, cursor);
 
-        ContactListAdapter adapter = new ContactListAdapter(this, cursor);
+		AutoCompleteTextView textView = (AutoCompleteTextView) findViewById(R.id.edit);
+		// 设置适配器
+		textView.setAdapter(adapter);
+	}
 
-        AutoCompleteTextView textView = (AutoCompleteTextView)
-                findViewById(R.id.edit);
-        textView.setAdapter(adapter);
-    }
+	/**
+	 * 获取联系人的数据适配器
+	 * 
+	 * @description：
+	 * @author ldm
+	 * @date 2016-5-17 上午11:14:14
+	 */
+	public static class ContactListAdapter extends CursorAdapter implements
+			Filterable {
 
-    // XXX compiler bug in javac 1.5.0_07-164, we need to implement Filterable
-    // to make compilation work
-    public static class ContactListAdapter extends CursorAdapter implements Filterable {
-        public ContactListAdapter(Context context, Cursor c) {
-            super(context, c);
-            mContent = context.getContentResolver();
-        }
+		private ContentResolver mContent;
 
-        @Override
-        public View newView(Context context, Cursor cursor, ViewGroup parent) {
-            final LayoutInflater inflater = LayoutInflater.from(context);
-            final TextView view = (TextView) inflater.inflate(
-                    android.R.layout.simple_dropdown_item_1line, parent, false);
-            view.setText(cursor.getString(COLUMN_DISPLAY_NAME));
-            return view;
-        }
+		@SuppressWarnings("deprecation")
+		public ContactListAdapter(Context context, Cursor c) {
+			super(context, c);
+			mContent = context.getContentResolver();
+		}
 
-        @Override
-        public void bindView(View view, Context context, Cursor cursor) {
-            ((TextView) view).setText(cursor.getString(COLUMN_DISPLAY_NAME));
-        }
+		@Override
+		public View newView(Context context, Cursor cursor, ViewGroup parent) {
+			final LayoutInflater inflater = LayoutInflater.from(context);
+			final TextView view = (TextView) inflater.inflate(
+					android.R.layout.simple_dropdown_item_1line, parent, false);
+			view.setText(cursor.getString(COLUMN_DISPLAY_NAME));
+			return view;
+		}
 
-        @Override
-        public String convertToString(Cursor cursor) {
-            return cursor.getString(COLUMN_DISPLAY_NAME);
-        }
+		@Override
+		public void bindView(View view, Context context, Cursor cursor) {
+			((TextView) view).setText(cursor.getString(COLUMN_DISPLAY_NAME));
+		}
 
-        @Override
-        public Cursor runQueryOnBackgroundThread(CharSequence constraint) {
-            FilterQueryProvider filter = getFilterQueryProvider();
-            if (filter != null) {
-                return filter.runQuery(constraint);
-            }
+		@Override
+		public String convertToString(Cursor cursor) {
+			return cursor.getString(COLUMN_DISPLAY_NAME);
+		}
 
-            Uri uri = Uri.withAppendedPath(
-                    Contacts.CONTENT_FILTER_URI,
-                    Uri.encode(constraint.toString()));
-            return mContent.query(uri, CONTACT_PROJECTION, null, null, null);
-        }
+		// 后台查询，获取联系人数据
+		@Override
+		public Cursor runQueryOnBackgroundThread(CharSequence constraint) {
+			FilterQueryProvider filter = getFilterQueryProvider();
+			if (filter != null) {
+				return filter.runQuery(constraint);
+			}
 
-        private ContentResolver mContent;
-    }
+			Uri uri = Uri.withAppendedPath(Contacts.CONTENT_FILTER_URI,
+					Uri.encode(constraint.toString()));
+			return mContent.query(uri, CONTACT_PROJECTION, null, null, null);
+		}
 
-    public static final String[] CONTACT_PROJECTION = new String[] {
-        Contacts._ID,
-        Contacts.DISPLAY_NAME
-    };
+	}
 
-    private static final int COLUMN_DISPLAY_NAME = 1;
 }

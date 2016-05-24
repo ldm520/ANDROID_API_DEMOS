@@ -29,62 +29,82 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.ViewFlipper;
 
-
+/**
+ * FlipperView文字效果动画之：文字滚动动画
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-17 上午9:58:26
+ */
 public class Animation2 extends Activity implements
-        AdapterView.OnItemSelectedListener {
+		AdapterView.OnItemSelectedListener {
+	// Spinner数据源
+	private String[] mStrings = { "Push up", "Push left", "Cross fade",
+			"Hyperspace" };
+	// 控件ViewFlipper
+	private ViewFlipper mFlipper;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.animation_2);
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.animation_2);
+		// 初始化UI控件
+		initViews();
+	}
 
-        mFlipper = ((ViewFlipper) this.findViewById(R.id.flipper));
-        mFlipper.startFlipping();
+	private void initViews() {
+		mFlipper = ((ViewFlipper) this.findViewById(R.id.flipper));
+		mFlipper.startFlipping();
+		Spinner s = (Spinner) findViewById(R.id.spinner);
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+				android.R.layout.simple_spinner_item, mStrings);
+		// 定义Spinner下拉菜单模式
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		// 设置数据
+		s.setAdapter(adapter);
+		// 添加监听
+		s.setOnItemSelectedListener(this);
+	}
 
-        Spinner s = (Spinner) findViewById(R.id.spinner);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, mStrings);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        s.setAdapter(adapter);
-        s.setOnItemSelectedListener(this);
-    }
+	/**
+	 * Spinner的item选择监听事件处理
+	 */
+	@Override
+	public void onItemSelected(AdapterView<?> parent, View v, int position,
+			long id) {
+		switch (position) {
 
-    public void onItemSelected(AdapterView<?> parent, View v, int position, long id) {
-        switch (position) {
+		case 0:// 文字从下进入，从上移出，伴随透明度变化
+			mFlipper.setInAnimation(AnimationUtils.loadAnimation(this,
+					R.anim.push_up_in));
+			mFlipper.setOutAnimation(AnimationUtils.loadAnimation(this,
+					R.anim.push_up_out));
+			break;
+		case 1:// 文字从右侧向左进入，从右侧移出，伴随透明度变化
+			mFlipper.setInAnimation(AnimationUtils.loadAnimation(this,
+					R.anim.push_left_in));
+			mFlipper.setOutAnimation(AnimationUtils.loadAnimation(this,
+					R.anim.push_left_out));
+			break;
+		case 2:// 文字透明度改变，从0-1-0
+			mFlipper.setInAnimation(AnimationUtils.loadAnimation(this,
+					android.R.anim.fade_in));
+			mFlipper.setOutAnimation(AnimationUtils.loadAnimation(this,
+					android.R.anim.fade_out));
+			break;
+		default:// 多维空间动画（复合动画效果）
+			mFlipper.setInAnimation(AnimationUtils.loadAnimation(this,
+					R.anim.hyperspace_in));
+			mFlipper.setOutAnimation(AnimationUtils.loadAnimation(this,
+					R.anim.hyperspace_out));
+			break;
+		}
+	}
 
-        case 0:
-            mFlipper.setInAnimation(AnimationUtils.loadAnimation(this,
-                    R.anim.push_up_in));
-            mFlipper.setOutAnimation(AnimationUtils.loadAnimation(this,
-                    R.anim.push_up_out));
-            break;
-        case 1:
-            mFlipper.setInAnimation(AnimationUtils.loadAnimation(this,
-                    R.anim.push_left_in));
-            mFlipper.setOutAnimation(AnimationUtils.loadAnimation(this,
-                    R.anim.push_left_out));
-            break;
-        case 2:
-            mFlipper.setInAnimation(AnimationUtils.loadAnimation(this,
-                    android.R.anim.fade_in));
-            mFlipper.setOutAnimation(AnimationUtils.loadAnimation(this,
-                    android.R.anim.fade_out));
-            break;
-        default:
-            mFlipper.setInAnimation(AnimationUtils.loadAnimation(this,
-                    R.anim.hyperspace_in));
-            mFlipper.setOutAnimation(AnimationUtils.loadAnimation(this,
-                    R.anim.hyperspace_out));
-            break;
-        }
-    }
-
-    public void onNothingSelected(AdapterView<?> parent) {
-    }
-
-    private String[] mStrings = {
-            "Push up", "Push left", "Cross fade", "Hyperspace"};
-
-    private ViewFlipper mFlipper;
+	@Override
+	public void onNothingSelected(AdapterView<?> parent) {
+		// TODO Auto-generated method stub
+		// DO NOTHING
+	}
 
 }

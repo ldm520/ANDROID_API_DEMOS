@@ -22,28 +22,35 @@ import android.util.AttributeSet;
 import android.widget.Checkable;
 import android.widget.FrameLayout;
 
+/**
+ * 自定义可以选择的Layout
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-17 上午11:22:42
+ */
 public class CheckableFrameLayout extends FrameLayout implements Checkable {
-    private boolean mChecked;
+	private boolean mChecked;
 
-    public CheckableFrameLayout(Context context) {
-        super(context);
-    }
+	public CheckableFrameLayout(Context context) {
+		super(context);
+	}
 
-    public CheckableFrameLayout(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
+	public CheckableFrameLayout(Context context, AttributeSet attrs) {
+		super(context, attrs);
+	}
 
-    public void setChecked(boolean checked) {
-        mChecked = checked;
-        setBackgroundDrawable(checked ? new ColorDrawable(0xff0000a0) : null);
-    }
+	public void setChecked(boolean checked) {
+		mChecked = checked;
+		setBackgroundDrawable(checked ? new ColorDrawable(0xff0000a0) : null);
+	}
 
-    public boolean isChecked() {
-        return mChecked;
-    }
+	public boolean isChecked() {
+		return mChecked;
+	}
 
-    public void toggle() {
-        setChecked(!mChecked);
-    }
+	public void toggle() {
+		setChecked(!mChecked);
+	}
 
 }

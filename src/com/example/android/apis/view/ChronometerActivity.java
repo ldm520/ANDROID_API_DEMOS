@@ -26,6 +26,13 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Chronometer;
 
+/**
+ * Chronometer计时器功能
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-5-17 上午11:41:56
+ */
 public class ChronometerActivity extends Activity implements OnClickListener {
 	private Chronometer mChronometer;
 	private Button start, stop, reset, format, clear_format;
@@ -61,24 +68,26 @@ public class ChronometerActivity extends Activity implements OnClickListener {
 
 	View.OnClickListener mStartListener = new OnClickListener() {
 		public void onClick(View v) {
-			mChronometer.start();
+			mChronometer.start();// 开始计时
 		}
 	};
 
 	View.OnClickListener mStopListener = new OnClickListener() {
 		public void onClick(View v) {
-			mChronometer.stop();
+			mChronometer.stop();// 停止计时
 		}
 	};
 
 	View.OnClickListener mResetListener = new OnClickListener() {
 		public void onClick(View v) {
+			// 设置计时时间基准
 			mChronometer.setBase(SystemClock.elapsedRealtime());
 		}
 	};
 
 	View.OnClickListener mSetFormatListener = new OnClickListener() {
 		public void onClick(View v) {
+			// 设置时间格式
 			mChronometer.setFormat("Formatted time (%s)");
 		}
 	};
