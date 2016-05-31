@@ -1686,7 +1686,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".view.ChronometerDemo"
+            android:name=".view.ChronometerActivity"
             android:label="Views/Chronometer" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

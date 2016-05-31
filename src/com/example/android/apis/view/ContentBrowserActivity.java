@@ -194,26 +194,23 @@ public class ContentBrowserActivity extends Activity implements
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.content_actions, menu);
-		//搜索功能
-		SearchView searchView = (SearchView) menu.findItem(R.id.action_search)
-				.getActionView();
-		searchView.setOnQueryTextListener(this);
+		 MenuInflater inflater = getMenuInflater();
+	        inflater.inflate(R.menu.content_actions, menu);
+	        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+	        searchView.setOnQueryTextListener(this);
 
-		MenuItem actionItem = menu
-				.findItem(R.id.menu_item_share_action_provider_action_bar);
-		ShareActionProvider actionProvider = (ShareActionProvider) actionItem
-				.getActionProvider();
-		actionProvider
-				.setShareHistoryFileName(ShareActionProvider.DEFAULT_SHARE_HISTORY_FILE_NAME);
-		// 分享操作
-		Intent shareIntent = new Intent(Intent.ACTION_SEND);
-		shareIntent.setType("image/*");
-		Uri uri = Uri.fromFile(getFileStreamPath("shared.png"));
-		shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
-		actionProvider.setShareIntent(shareIntent);
-		return true;
+	        // Set file with share history to the provider and set the share intent.
+	        MenuItem actionItem = menu.findItem(R.id.menu_item_share_action_provider_action_bar);
+	        ShareActionProvider actionProvider = (ShareActionProvider) actionItem.getActionProvider();
+	        actionProvider.setShareHistoryFileName(ShareActionProvider.DEFAULT_SHARE_HISTORY_FILE_NAME);
+	        // Note that you can set/change the intent any time,
+	        // say when the user has selected an image.
+	        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+	        shareIntent.setType("image/*");
+	        Uri uri = Uri.fromFile(getFileStreamPath("shared.png"));
+	        shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+	        actionProvider.setShareIntent(shareIntent);
+	        return true;
 	}
 
 	@Override
