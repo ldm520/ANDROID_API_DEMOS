@@ -24,25 +24,17 @@ import android.app.Activity;
 import android.os.Bundle;
 
 /**
- * <h3>Translucent Activity</h3>
+ * Activity半透明样式：Translucent
+ * 在AndroidManfiest.xml中设置样式：android:theme="@style/Theme.Translucent"
  * 
- * <p>This demonstrates the how to write an activity that is translucent,
- * allowing windows underneath to show through.</p>
+ * @description：
+ * @author ldm
+ * @date 2016-6-3 下午5:06:09
  */
 public class TranslucentActivity extends Activity {
-    /**
-     * Initialization of the Activity after it is first created.  Must at least
-     * call {@link android.app.Activity#setContentView setContentView()} to
-     * describe what is to be displayed in the screen.
-     */
-    @Override
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-        // Be sure to call the super class.
-        super.onCreate(savedInstanceState);
-        
-        // See assets/res/any/layout/translucent_background.xml for this
-        // view layout definition, which is being set here as
-        // the content of our screen.
-        setContentView(R.layout.translucent_background);
-    }
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.translucent_background);
+	}
 }

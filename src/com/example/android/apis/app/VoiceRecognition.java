@@ -16,7 +16,8 @@
 
 package com.example.android.apis.app;
 
-import com.example.android.apis.R;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -27,7 +28,6 @@ import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.speech.RecognizerIntent;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
@@ -38,193 +38,197 @@ import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.example.android.apis.R;
 
 /**
- * Sample code that invokes the speech recognition intent API.
+ * Android语音又识别Sample
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-6-3 下午3:45:09
  */
 public class VoiceRecognition extends Activity implements OnClickListener {
 
-    private static final String TAG = "VoiceRecognition";
+	private static final int VOICE_RECOGNITION_REQUEST_CODE = 1234;
 
-    private static final int VOICE_RECOGNITION_REQUEST_CODE = 1234;
+	private ListView mList;
 
-    private ListView mList;
+	private Handler mHandler;
 
-    private Handler mHandler;
+	private Spinner mSupportedLanguageView;
 
-    private Spinner mSupportedLanguageView;
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		mHandler = new Handler();
+		setContentView(R.layout.voice_recognition);
+		Button speakButton = (Button) findViewById(R.id.btn_speak);
+		mList = (ListView) findViewById(R.id.list);
+		mSupportedLanguageView = (Spinner) findViewById(R.id.supported_languages);
 
-    /**
-     * Called with the activity is first created.
-     */
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mHandler = new Handler();
+		// 获取包管理操作类PackageManager实例
+		PackageManager pm = getPackageManager();
+		// 检查是否存在语音识别功能的activity
+		List<ResolveInfo> activities = pm.queryIntentActivities(new Intent(
+				RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
+		if (activities.size() != 0) {
+			// 如果存在recognition activity则为按钮绑定点击事件
+			speakButton.setOnClickListener(this);
+		} else {
+			// 如果不存在则禁用按钮并做提示
+			speakButton.setEnabled(false);
+			speakButton.setText("Recognizer not present");
+		}
 
-        // Inflate our UI from its XML layout description.
-        setContentView(R.layout.voice_recognition);
+		// Most of the applications do not have to handle the voice settings. If
+		// the application
+		// does not require a recognition in a specific language (i.e.,
+		// different from the system
+		// locale), the application does not need to read the voice settings.
+		// refreshVoiceSettings();
+	}
 
-        // Get display items for later interaction
-        Button speakButton = (Button) findViewById(R.id.btn_speak);
+	/**
+	 * Handle the click on the start recognition button.
+	 */
+	public void onClick(View v) {
+		if (v.getId() == R.id.btn_speak) {
+			startVoiceRecognitionActivity();
+		}
+	}
 
-        mList = (ListView) findViewById(R.id.list);
+	/**
+	 * Fire an intent to start the speech recognition activity.
+	 */
+	private void startVoiceRecognitionActivity() {
+		// 通过Intent来传递一个动作以及一些属性，然后通过startActivityForResult来开始语音
+		Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 
-        mSupportedLanguageView = (Spinner) findViewById(R.id.supported_languages);
+		// 传递应用名包名
+		intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getClass()
+				.getPackage().getName());
 
-        // Check to see if a recognition activity is present
-        PackageManager pm = getPackageManager();
-        List<ResolveInfo> activities = pm.queryIntentActivities(
-                new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
-        if (activities.size() != 0) {
-            speakButton.setOnClickListener(this);
-        } else {
-            speakButton.setEnabled(false);
-            speakButton.setText("Recognizer not present");
-        }
+		// 传递提示信息
+		intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
+				"Speech recognition demo");
 
-        // Most of the applications do not have to handle the voice settings. If the application
-        // does not require a recognition in a specific language (i.e., different from the system
-        // locale), the application does not need to read the voice settings.
-        refreshVoiceSettings();
-    }
+		// 传递语音模式
+		intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+				RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 
-    /**
-     * Handle the click on the start recognition button.
-     */
-    public void onClick(View v) {
-        if (v.getId() == R.id.btn_speak) {
-            startVoiceRecognitionActivity();
-        }
-    }
+		// 最大数量
+		intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5);
 
-    /**
-     * Fire an intent to start the speech recognition activity.
-     */
-    private void startVoiceRecognitionActivity() {
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+		// parameter.
+		if (!mSupportedLanguageView.getSelectedItem().toString()
+				.equals("Default")) {
+			// 传递语言
+			intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE,
+					mSupportedLanguageView.getSelectedItem().toString());
+		}
 
-        // Specify the calling package to identify your application
-        intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getClass().getPackage().getName());
+		startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE);
+	}
 
-        // Display an hint to the user about what he should say.
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speech recognition demo");
+	/**
+	 * 处理数据
+	 */
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == VOICE_RECOGNITION_REQUEST_CODE
+				&& resultCode == RESULT_OK) {
+			ArrayList<String> matches = data
+					.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+			mList.setAdapter(new ArrayAdapter<String>(this,
+					android.R.layout.simple_list_item_1, matches));
+		}
 
-        // Given an hint to the recognizer about what the user is going to say
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+		super.onActivityResult(requestCode, resultCode, data);
+	}
 
-        // Specify how many results you want to receive. The results will be sorted
-        // where the first result is the one with higher confidence.
-        intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5);
+	private void refreshVoiceSettings() {
+		sendOrderedBroadcast(RecognizerIntent.getVoiceDetailsIntent(this),
+				null, new SupportedLanguageBroadcastReceiver(), null,
+				Activity.RESULT_OK, null, null);
+	}
 
-        // Specify the recognition language. This parameter has to be specified only if the
-        // recognition has to be done in a specific language and not the default one (i.e., the
-        // system locale). Most of the applications do not have to set this parameter.
-        if (!mSupportedLanguageView.getSelectedItem().toString().equals("Default")) {
-            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE,
-                    mSupportedLanguageView.getSelectedItem().toString());
-        }
+	/**
+	 * 更新语音支持数据
+	 * 
+	 * @description：
+	 * @author ldm
+	 * @date 2016-6-3 下午3:59:00
+	 */
+	private void updateSupportedLanguages(List<String> languages) {
+		languages.add(0, "Default");
+		SpinnerAdapter adapter = new ArrayAdapter<CharSequence>(this,
+				android.R.layout.simple_spinner_item,
+				languages.toArray(new String[languages.size()]));
+		mSupportedLanguageView.setAdapter(adapter);
+	}
 
-        startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE);
-    }
+	private void updateLanguagePreference(String language) {
+		TextView textView = (TextView) findViewById(R.id.language_preference);
+		textView.setText(language);
+	}
 
-    /**
-     * Handle the results from the recognition activity.
-     */
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == VOICE_RECOGNITION_REQUEST_CODE && resultCode == RESULT_OK) {
-            // Fill the list view with the strings the recognizer thought it could have heard
-            ArrayList<String> matches = data.getStringArrayListExtra(
-                    RecognizerIntent.EXTRA_RESULTS);
-            mList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
-                    matches));
-        }
+	/**
+	 * 处理有关语音识别所述广播请求的响应支持的语言。
+	 * 
+	 * 只有当应用程序需要识别特定的语言，广播才会调用
+	 */
+	private class SupportedLanguageBroadcastReceiver extends BroadcastReceiver {
 
-        super.onActivityResult(requestCode, resultCode, data);
-    }
+		@Override
+		public void onReceive(Context context, final Intent intent) {
+			// 获取到数据
+			final Bundle extra = getResultExtras(false);
 
-    private void refreshVoiceSettings() {
-        Log.i(TAG, "Sending broadcast");
-        sendOrderedBroadcast(RecognizerIntent.getVoiceDetailsIntent(this), null,
-                new SupportedLanguageBroadcastReceiver(), null, Activity.RESULT_OK, null, null);
-    }
+			if (getResultCode() != Activity.RESULT_OK) {
+				mHandler.post(new Runnable() {
+					@Override
+					public void run() {
+						showToast("Error code:" + getResultCode());
+					}
+				});
+			}
 
-    private void updateSupportedLanguages(List<String> languages) {
-        // We add "Default" at the beginning of the list to simulate default language.
-        languages.add(0, "Default");
+			if (extra == null) {
+				mHandler.post(new Runnable() {
+					@Override
+					public void run() {
+						showToast("No extra");
+					}
+				});
+			}
 
-        SpinnerAdapter adapter = new ArrayAdapter<CharSequence>(this,
-                android.R.layout.simple_spinner_item, languages.toArray(
-                        new String[languages.size()]));
-        mSupportedLanguageView.setAdapter(adapter);
-    }
+			if (extra.containsKey(RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES)) {
+				mHandler.post(new Runnable() {
 
-    private void updateLanguagePreference(String language) {
-        TextView textView = (TextView) findViewById(R.id.language_preference);
-        textView.setText(language);
-    }
+					@Override
+					public void run() {
+						// 更新数据
+						updateSupportedLanguages(extra
+								.getStringArrayList(RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES));
+					}
+				});
+			}
 
-    /**
-     * Handles the response of the broadcast request about the recognizer supported languages.
-     *
-     * The receiver is required only if the application wants to do recognition in a specific
-     * language.
-     */
-    private class SupportedLanguageBroadcastReceiver extends BroadcastReceiver {
+			if (extra.containsKey(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE)) {
+				mHandler.post(new Runnable() {
 
-        @Override
-        public void onReceive(Context context, final Intent intent) {
-            Log.i(TAG, "Receiving broadcast " + intent);
+					@Override
+					public void run() {
+						// 更新数据
+						updateLanguagePreference(extra
+								.getString(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE));
+					}
+				});
+			}
+		}
 
-            final Bundle extra = getResultExtras(false);
-
-            if (getResultCode() != Activity.RESULT_OK) {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        showToast("Error code:" + getResultCode());
-                    }
-                });
-            }
-
-            if (extra == null) {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        showToast("No extra");
-                    }
-                });
-            }
-
-            if (extra.containsKey(RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES)) {
-                mHandler.post(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        updateSupportedLanguages(extra.getStringArrayList(
-                                RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES));
-                    }
-                });
-            }
-
-            if (extra.containsKey(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE)) {
-                mHandler.post(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        updateLanguagePreference(
-                                extra.getString(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE));
-                    }
-                });
-            }
-        }
-
-        private void showToast(String text) {
-            Toast.makeText(VoiceRecognition.this, text, 1000).show();
-        }
-    }
+		private void showToast(String text) {
+			Toast.makeText(VoiceRecognition.this, text, 1000).show();
+		}
+	}
 }

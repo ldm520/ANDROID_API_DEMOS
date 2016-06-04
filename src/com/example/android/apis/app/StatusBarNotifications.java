@@ -238,7 +238,8 @@ public class StatusBarNotifications extends Activity {
         mNotificationManager.notify(MOOD_NOTIFICATIONS, notif);
     }
     
-    private void setDefault(int defaults) {
+    @SuppressWarnings("deprecation")
+	private void setDefault(int defaults) {
         
         // This method sets the defaults on the notification before posting it.
         
@@ -248,7 +249,8 @@ public class StatusBarNotifications extends Activity {
         // In this sample, we'll use the same text for the ticker and the expanded notification
         CharSequence text = getText(R.string.status_bar_notifications_happy_message);
 
-        final Notification notification = new Notification(
+        @SuppressWarnings("deprecation")
+		final Notification notification = new Notification(
                 R.drawable.stat_happy,       // the icon for the status bar
                 text,                        // the text to display in the ticker
                 System.currentTimeMillis()); // the timestamp for the notification

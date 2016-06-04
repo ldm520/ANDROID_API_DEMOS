@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- android:verticalSpacing指item间的垂直间距 -->
+<!-- android:horizontalSpacing指item间的水平间距 -->
+<!-- android:numColumns指第一行itm的个数 -->
+<!--  android:layoutAnimation通过这个设备item的加载动画 -->
+<GridView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/grid"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:columnWidth="60dp"
+    android:gravity="center"
+    android:horizontalSpacing="10dp"
+    android:layoutAnimation="@anim/layout_grid_fade"
+    android:numColumns="auto_fit"
+    android:padding="10dp"
+    android:stretchMode="columnWidth"
+    android:verticalSpacing="10dp" />

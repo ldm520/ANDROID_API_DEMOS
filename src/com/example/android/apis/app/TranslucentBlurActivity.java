@@ -24,32 +24,22 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.WindowManager;
 
-
 /**
- * <h3>Fancy Blur Activity</h3>
+ * Activity样式之：Fancy Blur Activity
  * 
- * <p>This demonstrates the how to write an activity that is translucent,
- * allowing windows underneath to show through, with a fancy blur
- * compositing effect.</p>
+ * @description：
+ * @author ldm
+ * @date 2016-6-3 下午5:03:58
  */
 public class TranslucentBlurActivity extends Activity {
-    /**
-     * Initialization of the Activity after it is first created.  Must at least
-     * call {@link android.app.Activity#setContentView setContentView()} to
-     * describe what is to be displayed in the screen.
-     */
-    @Override
-    protected void onCreate(Bundle icicle) {
-        // Be sure to call the super class.
-        super.onCreate(icicle);
 
-        // Have the system blur any windows behind this one.
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND,
-                WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
-        
-        // See assets/res/any/layout/translucent_background.xml for this
-        // view layout definition, which is being set here as
-        // the content of our screen.
-        setContentView(R.layout.translucent_background);
-    }
+	@SuppressWarnings("deprecation")
+	@Override
+	protected void onCreate(Bundle icicle) {
+		super.onCreate(icicle);
+		// 设置背景模糊
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND,
+				WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+		setContentView(R.layout.translucent_background);
+	}
 }

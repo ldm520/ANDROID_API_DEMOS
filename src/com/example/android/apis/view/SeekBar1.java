@@ -23,38 +23,48 @@ import android.widget.TextView;
 
 import com.example.android.apis.R;
 
-
 /**
- * Demonstrates how to use a seek bar
+ * Android控件之SeekBar介绍 OnSeekBarChangeListener：拖动进度条发生变化监听接口
+ * 
+ * @description：
+ * @author ldm
+ * @date 2016-6-3 上午10:39:22
  */
-public class SeekBar1 extends Activity implements SeekBar.OnSeekBarChangeListener {
-    
-    SeekBar mSeekBar;
-    TextView mProgressText;
-    TextView mTrackingText;
-    
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+public class SeekBar1 extends Activity implements
+		SeekBar.OnSeekBarChangeListener {
 
-        setContentView(R.layout.seekbar_1);
-        
-        mSeekBar = (SeekBar)findViewById(R.id.seek);
-        mSeekBar.setOnSeekBarChangeListener(this);
-        mProgressText = (TextView)findViewById(R.id.progress);
-        mTrackingText = (TextView)findViewById(R.id.tracking);
-    }
+	private SeekBar mSeekBar;// 拖动条
+	TextView mProgressText;// 进度提示文字
+	TextView mTrackingText;// 拖动状态提示文字
 
-    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromTouch) {
-        mProgressText.setText(progress + " " + 
-                getString(R.string.seekbar_from_touch) + "=" + fromTouch);
-    }
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_seekbar);
+		initViews();
+	}
 
-    public void onStartTrackingTouch(SeekBar seekBar) {
-        mTrackingText.setText(getString(R.string.seekbar_tracking_on));
-    }
+	private void initViews() {
+		mSeekBar = (SeekBar) findViewById(R.id.seek);
+		mSeekBar.setOnSeekBarChangeListener(this);
+		mProgressText = (TextView) findViewById(R.id.progress);
+		mTrackingText = (TextView) findViewById(R.id.tracking);
+	}
 
-    public void onStopTrackingTouch(SeekBar seekBar) {
-        mTrackingText.setText(getString(R.string.seekbar_tracking_off));
-    }
+	// 进度长发生改变
+	public void onProgressChanged(SeekBar seekBar, int progress,
+			boolean fromTouch) {
+		mProgressText.setText("当前进度-->" + progress + "是否为用户拖动的滑块-->= "
+				+ fromTouch);
+	}
+
+	// 开始拖动状态监听
+	public void onStartTrackingTouch(SeekBar seekBar) {
+		mTrackingText.setText("开始拖动");
+	}
+
+	// 停止拖动状态监听
+	public void onStopTrackingTouch(SeekBar seekBar) {
+		mTrackingText.setText("停止拖动");
+	}
 }
